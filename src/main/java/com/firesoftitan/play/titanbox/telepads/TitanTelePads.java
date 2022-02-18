@@ -17,6 +17,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 
 public class TitanTelePads extends JavaPlugin {
     public static Tools tools;
@@ -54,11 +56,16 @@ public class TitanTelePads extends JavaPlugin {
                     } else {
                         TitanTelePads.update = true;
                         messageTool.sendMessageSystem("There is a new update available.");
-                        messageTool.sendMessageSystem( "https://www.spigotmc.org/resources/titan-teleport-pads.99835/");
+                        messageTool.sendMessageSystem( "https://www.spigotmc.org/resources/titan-teleport-pads.99835");
                     }
                 });
             }
         }.runTaskLater(this,20);
+    }
+    public static String getNext(List<String> myList, String uid) {
+        int idx = myList.indexOf(uid);
+        if (idx < 0 || idx+1 == myList.size()) return myList.get(0);
+        return myList.get(idx + 1);
     }
     public void onDisable()
     {

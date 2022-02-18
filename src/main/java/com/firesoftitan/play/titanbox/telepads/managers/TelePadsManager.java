@@ -4,9 +4,12 @@ import com.firesoftitan.play.titanbox.libs.managers.SaveManager;
 import com.firesoftitan.play.titanbox.telepads.TitanTelePads;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -56,6 +59,47 @@ public class TelePadsManager {
         String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
         configFile.set("telepads." + key + ".name", name);
         TitanTelePads.tools.getFloatingTextTool().changeFloatingText(location,  name);
+    }
+    public ItemStack getIcon(Location location)
+    {
+        String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
+        if (!configFile.contains("telepads." + key + ".icon"))
+        {
+            try {
+                if (!isAdmin(location)) {
+                    String playersTexture = TitanTelePads.tools.getPlayerTool().getPlayersTexture(getOwner(location));
+                    ItemStack skull = TitanTelePads.tools.getSkullTool().getSkull(playersTexture);
+                    configFile.set("telepads." + key + ".icon", skull);
+                }
+                else
+                {
+                    configFile.set("telepads." + key + ".icon", new ItemStack(Material.BOOKSHELF));
+                }
+            } catch (IOException e) {
+
+            }
+        }
+        return configFile.getItem("telepads." + key + ".icon");
+    }
+    public void setIcon(Location location, ItemStack icon) {
+        String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
+        icon = TitanTelePads.tools.getItemStackTool().changeName(icon, "icon");
+        icon = TitanTelePads.tools.getItemStackTool().clearLore(icon);
+        configFile.set("telepads." + key + ".icon", icon.clone());
+    }
+    public String getCategory(Location location)
+    {
+        String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
+        if (!configFile.contains("telepads." + key + ".category"))
+        {
+            configFile.set("telepads." + key + ".category", TitanTelePads.configManager.getCategoryDefault());
+        }
+        return configFile.getString("telepads." + key + ".category");
+    }
+    public void setCategory(Location location, String cat)
+    {
+        String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
+        configFile.set("telepads." + key + ".category", cat);
     }
     public String getName(Location location)
     {
@@ -120,8 +164,49 @@ public class TelePadsManager {
         configFile.set("telepads." + key + ".name", name);
         configFile.set("telepads." + key + ".private", privacy);
         configFile.set("telepads." + key + ".admin", admin);
+        configFile.set("telepads." + key + ".category", TitanTelePads.configManager.getCategoryDefault());
+
+        try {
+            if (!admin) {
+                String playersTexture = TitanTelePads.tools.getPlayerTool().getPlayersTexture(owner);
+                ItemStack skull = TitanTelePads.tools.getSkullTool().getSkull(playersTexture);
+                configFile.set("telepads." + key + ".icon", skull);
+            }
+            else
+            {
+                configFile.set("telepads." + key + ".icon", new ItemStack(Material.BOOKSHELF));
+            }
+        } catch (IOException e) {
+
+        }
+
+
         output.add(location.clone());
         TitanTelePads.tools.getFloatingTextTool().setFloatingText(location.add(0.5f, 2, 0.5f), name);
+    }
+    public List<Location> getAll(String category)
+    {
+        List<Location> owners = new ArrayList<Location>();
+        for(Location location: output)
+        {
+            if (getOwner(location) != null) {
+                if (getCategory(location).equals(category)) {
+                    owners.add(location.clone());
+                }
+            }
+        }
+        return owners;
+    }
+    public List<Location> getAllAdmin()
+    {
+        List<Location> owners = new ArrayList<Location>();
+        for(Location location: output)
+        {
+            if (isAdmin(location)) {
+                owners.add(location.clone());
+            }
+        }
+        return owners;
     }
     public List<Location> getAll(UUID owner)
     {

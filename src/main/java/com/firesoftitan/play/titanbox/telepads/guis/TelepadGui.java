@@ -23,14 +23,14 @@ public class TelepadGui {
     private int size;
     private Player viewer;
     private int scrollStart = 0;
-    private boolean showingALl = false;
     private List<Location> locations;
+    private String showingCat = "";
     public static String guiName = "TelePad Gui";
     public static TelepadGui getGui(Player player)
     {
         if (activeGuis.containsKey(player.getUniqueId())) {
             TelepadGui telepadGui = activeGuis.get(player.getUniqueId());
-            if (telepadGui.isGuiOpen()) return telepadGui;
+            return telepadGui;
         }
         return null;
     }
@@ -64,19 +64,29 @@ public class TelepadGui {
     }
 
     public void redrawBookButton() {
+        int start = size - 8;
         ItemStack button;
         NBTTagCompound nbtTagCompound;
-        button = new ItemStack(Material.BOOK);
-        if (showingALl) {
-            button = new ItemStack(Material.BOOKSHELF);
-            button = TitanTelePads.tools.getItemStackTool().changeName(button, "Showing All TelePads");
-        } else {
-            button = TitanTelePads.tools.getItemStackTool().changeName(button, "Showing Personal TelePads");
+        List<String> allCats = TitanTelePads.configManager.getCategoryNames();
+        for (int i = 0; i < Math.min(allCats.size(), 7); i++) {
+            button = new ItemStack(Material.BOOK);
+            String catName = allCats.get(i);
+            int slot = TitanTelePads.configManager.getCategorySlot(catName);
+            if (catName.equalsIgnoreCase("admin") || catName.equalsIgnoreCase("mine") || catName.equalsIgnoreCase("all"))
+            {
+                button = new ItemStack(Material.WRITABLE_BOOK);
+            }
+            if (catName.equals(showingCat))
+            {
+                button = new ItemStack(Material.ENCHANTED_BOOK);
+            }
+            button = TitanTelePads.tools.getItemStackTool().changeName(button, catName);
+            nbtTagCompound = TitanTelePads.tools.getNBTTool().getNBTTag(button);
+            nbtTagCompound.a("buttonaction", "switch");
+            nbtTagCompound.a("category", catName);
+            button = TitanTelePads.tools.getNBTTool().setNBTTag(button, nbtTagCompound);
+            myGui.setItem(start + slot, button.clone());
         }
-        nbtTagCompound = TitanTelePads.tools.getNBTTool().getNBTTag(button);
-        nbtTagCompound.a("buttonaction", "switch");
-        button = TitanTelePads.tools.getNBTTool().setNBTTag(button, nbtTagCompound);
-        myGui.setItem(size - 5, button.clone());
     }
 
     public void drawMain() {
@@ -85,45 +95,28 @@ public class TelepadGui {
         for (int i = 0; i < size - 9; i++) {
             ItemStack button = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
             if (i + scrollStart < locations.size() ) {
-                try {
-                    Location l = locations.get(i + scrollStart);
-                    Boolean admin = TelePadsManager.instants.isAdmin(l);
-                    UUID owner = TelePadsManager.instants.getOwner(l);
-                    if (!admin) {
-                        String playersTexture = TitanTelePads.tools.getPlayerTool().getPlayersTexture(owner);
-                        button = TitanTelePads.tools.getSkullTool().getSkull(playersTexture);
-                    }
-                    else
-                    {
-                        button = new ItemStack(TitanTelePads.configManager.getMaterial());
-                    }
-                    if (TitanTelePads.tools.getItemStackTool().isEmpty(button)) button = telepads.clone();
+                Location l = locations.get(i + scrollStart);
+                Boolean admin = TelePadsManager.instants.isAdmin(l);
+                UUID owner = TelePadsManager.instants.getOwner(l);
+                button = TelePadsManager.instants.getIcon(l);
+                if (TitanTelePads.tools.getItemStackTool().isEmpty(button)) button = telepads.clone();
+                button = TitanTelePads.tools.getItemStackTool().changeName(button, ChatColor.GREEN + "(Public) "  + ChatColor.RESET + TelePadsManager.instants.getName(l));
+                if (TelePadsManager.instants.isPrivate(l)) button = TitanTelePads.tools.getItemStackTool().changeName(button, ChatColor.RED + "(Private) "  + ChatColor.RESET + TelePadsManager.instants.getName(l));
 
-                    button = TitanTelePads.tools.getItemStackTool().changeName(button, ChatColor.AQUA + "Teleport Pad");
-                    List<String> lore = new ArrayList<String>();
-                    lore.add("World: " + ChatColor.WHITE + l.getWorld().getName());
-                    lore.add("Name: " + ChatColor.WHITE + TelePadsManager.instants.getName(l));
-                    lore.add("Private: " + ChatColor.WHITE + TelePadsManager.instants.isPrivate(l));
-                    if (admin)
-                        lore.add("Owner: " + ChatColor.RED + "ADMIN");
-                    else
-                        lore.add("Owner: " + ChatColor.WHITE + TelePadsManager.instants.getOwnerName(l));
-                    if (owner.equals(viewer.getUniqueId()))
-                    {
-                        lore.add(ChatColor.GRAY + "Right to set name");
-                        lore.add(ChatColor.GRAY + "Shift-Left to change privacy");
-                    }
-                    if (TitanTelePads.isAdmin(viewer))
-                    {
-                        lore.add(ChatColor.GRAY + "Shift-Right to change admin status of pad");
-                    }
-                    button = TitanTelePads.tools.getItemStackTool().addLore(button, lore);
-                    NBTTagCompound nbtTagCompound = TitanTelePads.tools.getNBTTool().getNBTTag(button);
-                    nbtTagCompound.a("padlocation", TitanTelePads.tools.getSerializeTool().serializeLocation(l));
-                    button = TitanTelePads.tools.getNBTTool().setNBTTag(button, nbtTagCompound);
-                } catch (IOException e) {
-//                    e.printStackTrace();
+                List<String> lore = new ArrayList<String>();
+                lore.add("World: " + ChatColor.WHITE + l.getWorld().getName());
+                if (admin)
+                    lore.add("Owner: " + ChatColor.DARK_RED + "ADMIN");
+                else
+                    lore.add("Owner: " + ChatColor.WHITE + TelePadsManager.instants.getOwnerName(l));
+                if (owner.equals(viewer.getUniqueId()) || TitanTelePads.isAdmin(viewer))
+                {
+                    lore.add(ChatColor.GRAY + "Right for settings");
                 }
+                button = TitanTelePads.tools.getItemStackTool().addLore(button, lore);
+                NBTTagCompound nbtTagCompound = TitanTelePads.tools.getNBTTool().getNBTTag(button);
+                nbtTagCompound.a("padlocation", TitanTelePads.tools.getSerializeTool().serializeLocation(l));
+                button = TitanTelePads.tools.getNBTTool().setNBTTag(button, nbtTagCompound);
             }
             myGui.setItem(i, button.clone());
         }
@@ -157,34 +150,46 @@ public class TelepadGui {
         viewer = null;
         return null;
     }
-    public void setToggle()
+    public void setToggle(String category)
     {
-        if (showingALl) setOwnerList();
-        else setAllList();
+        TelePadsManager padsManager = TelePadsManager.instants;
+        showingCat = category;
+         List<Location> tempSort = padsManager.getAll(showingCat);
+        if (category.equalsIgnoreCase("all")) tempSort = padsManager.getAll();
+        if (category.equalsIgnoreCase("mine")) tempSort = padsManager.getAll(viewer.getUniqueId());
+        if (category.equalsIgnoreCase("admin")) tempSort = padsManager.getAllAdmin();
+        filterPrivacy(tempSort);
     }
-    public void setOwnerList()
-    {
-        showingALl = false;
-        scrollStart = 0;
-        locations = TelePadsManager.instants.getAll(viewer.getUniqueId());
-    }
-    public void setAllList()
-    {
-        showingALl = true;
-        scrollStart = 0;
-        locations = TelePadsManager.instants.getAll();
-        if (!TitanTelePads.isAdmin(viewer))
+
+    private void filterPrivacy(List<Location> tempSort) {
+        TelePadsManager padsManager = TelePadsManager.instants;
+        locations = new ArrayList<Location>();
+        for(Location location: tempSort)
         {
-            locations.clear();
-            for(Location location: TelePadsManager.instants.getAll())
+            if (padsManager.isPrivate(location))
             {
-                if (!TelePadsManager.instants.isPrivate(location) || TelePadsManager.instants.getOwner(location).equals(viewer.getUniqueId()))
+                if (padsManager.isAdmin(location))
                 {
-                    locations.add(location);
+                    if (TitanTelePads.isAdmin(viewer))
+                    {
+                        locations.add(location.clone());
+                    }
                 }
+                else
+                {
+                    if (TitanTelePads.isAdmin(viewer) || padsManager.getOwner(location).equals(viewer.getUniqueId()))
+                    {
+                        locations.add(location.clone());
+                    }
+                }
+            }
+            else
+            {
+                locations.add(location.clone());
             }
         }
     }
+
     public Inventory getMyGui() {
         return myGui;
     }
@@ -196,7 +201,7 @@ public class TelepadGui {
     {
         viewer = player;
         activeGuis.put(viewer.getUniqueId(), this);
-        setOwnerList();
+        setToggle(TitanTelePads.configManager.getCategoryDefaultOpen());
         mainDraw();
         player.openInventory(myGui);
     }

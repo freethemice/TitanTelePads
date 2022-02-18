@@ -1,7 +1,10 @@
 package com.firesoftitan.play.titanbox.telepads.listeners;
 
+import com.firesoftitan.play.titanbox.libs.tools.LibsItemStackTool;
 import com.firesoftitan.play.titanbox.telepads.TitanTelePads;
 import com.firesoftitan.play.titanbox.telepads.guis.TelepadGui;
+import com.firesoftitan.play.titanbox.telepads.guis.TelepadSettingsGui;
+import com.firesoftitan.play.titanbox.telepads.managers.ConfigManager;
 import com.firesoftitan.play.titanbox.telepads.managers.PressureManager;
 import com.firesoftitan.play.titanbox.telepads.managers.TelePadsManager;
 import net.minecraft.nbt.NBTTagCompound;
@@ -9,7 +12,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -27,17 +32,21 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
+
+import static com.firesoftitan.play.titanbox.telepads.TitanTelePads.*;
 
 public class MainListener  implements Listener {
 
     private static HashMap<UUID, Location> changeNames = new HashMap<UUID, Location>();
+    private static HashMap<UUID, Location> changeIcons = new HashMap<UUID, Location>();
     public MainListener(){
 
     }
     public void registerEvents(){
-        PluginManager pm = TitanTelePads.instants.getServer().getPluginManager();
-        pm.registerEvents(this, TitanTelePads.instants);
+        PluginManager pm = instants.getServer().getPluginManager();
+        pm.registerEvents(this, instants);
     }
 
     @EventHandler
@@ -46,16 +55,16 @@ public class MainListener  implements Listener {
         Player player = event.getPlayer();
 
 
-        if (TitanTelePads.isAdmin(player)) {
-            if (TitanTelePads.update) {
+        if (isAdmin(player)) {
+            if (update) {
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        TitanTelePads.messageTool.sendMessagePlayer(player,"There is a new update available.");
-                        TitanTelePads.messageTool.sendMessagePlayer(player, "https://www.spigotmc.org/resources/titan-teleport-pads.99835/");
+                        messageTool.sendMessagePlayer(player,"There is a new update available.");
+                        messageTool.sendMessagePlayer(player, "https://www.spigotmc.org/resources/titan-teleport-pads.99835/");
 
                     }
-                }.runTaskLater(TitanTelePads.instants, 20);
+                }.runTaskLater(instants, 20);
             }
         }
 
@@ -66,6 +75,38 @@ public class MainListener  implements Listener {
     public static void onAsyncPlayerChatEvent(AsyncPlayerChatEvent event)
     {
         Player player = event.getPlayer();
+        if (changeIcons.containsKey(player.getUniqueId()))
+        {
+            event.setCancelled(true);
+            Location location = changeIcons.get(player.getUniqueId());
+            changeIcons.remove(player.getUniqueId());
+            if (!event.getMessage().equalsIgnoreCase("cancel"))
+            {
+                UUID owner = TelePadsManager.instants.getOwner(location);
+                if (owner.equals(player.getUniqueId()) || isAdmin(player)) {
+                    if (event.getMessage().equalsIgnoreCase("hand"))
+                    {
+                        TelePadsManager.instants.setIcon(location, player.getInventory().getItemInMainHand().clone());
+                        messageTool.sendMessagePlayer(player, "Icon changed!");
+                    }
+                    else
+                    {
+                        ItemStack skull = tools.getSkullTool().getSkull(event.getMessage());
+                        TelePadsManager.instants.setIcon(location, skull);
+                        messageTool.sendMessagePlayer(player, "Icon changed!");
+                    }
+                    TelepadSettingsGui settingsGui = TelepadSettingsGui.getGui(player);
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            settingsGui.showGUI(player, settingsGui.getLocations());
+                        }
+                    }.runTaskLater(instants, 1);
+                    return;
+                }
+            }
+            messageTool.sendMessagePlayer(player, "Icon changed CANCELED!");
+        }
         if (changeNames.containsKey(player.getUniqueId()))
         {
             event.setCancelled(true);
@@ -74,13 +115,21 @@ public class MainListener  implements Listener {
             if (!event.getMessage().equalsIgnoreCase("cancel"))
             {
                 UUID owner = TelePadsManager.instants.getOwner(location);
-                if (owner.equals(player.getUniqueId())) {
+                if (owner.equals(player.getUniqueId()) || isAdmin(player)) {
                     TelePadsManager.instants.setName(location, ChatColor.translateAlternateColorCodes('&', event.getMessage()));
-                    TitanTelePads.messageTool.sendMessagePlayer(player, "Name changed!");
+                    messageTool.sendMessagePlayer(player, "Name changed!");
+                    TelepadSettingsGui settingsGui = TelepadSettingsGui.getGui(player);
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            settingsGui.showGUI(player, settingsGui.getLocations());
+                        }
+                    }.runTaskLater(instants, 1);
+
                     return;
                 }
             }
-            TitanTelePads.messageTool.sendMessagePlayer(player, "Name changed CANCELED!");
+            messageTool.sendMessagePlayer(player, "Name changed CANCELED!");
         }
     }
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
@@ -92,6 +141,78 @@ public class MainListener  implements Listener {
         HumanEntity whoClicked = event.getWhoClicked();
         InventoryView openInventory = whoClicked.getOpenInventory();
         Inventory clickedInventory = event.getClickedInventory();
+        TelepadGuiClicked(event, whoClicked, openInventory, clickedInventory);
+        TelepadSettingsGuiClicked(event, whoClicked, openInventory, clickedInventory);
+
+    }
+    private static void TelepadSettingsGuiClicked(InventoryClickEvent event, HumanEntity whoClicked, InventoryView openInventory, Inventory clickedInventory) {
+        if (openInventory.getTitle().equals(TelepadSettingsGui.guiName)) {
+            event.setCancelled(true);
+            TelepadSettingsGui telepadGui = TelepadSettingsGui.getGui((Player) whoClicked);
+            if (telepadGui != null)
+            {
+                Location locations = telepadGui.getLocations();
+                boolean isOwner = TelePadsManager.instants.getOwner(locations).equals(whoClicked.getUniqueId());
+                if (event.getSlot() > -1 && event.getSlot() < telepadGui.getSize()) {
+                    ItemStack clicked = clickedInventory.getItem(event.getSlot());
+                    if (!tools.getItemStackTool().isEmpty(clicked)) {
+                        NBTTagCompound nbtTag = tools.getNBTTool().getNBTTag(clicked);
+                        if (nbtTag != null) {
+                            String action = nbtTag.l("buttonaction");
+                            if (action != null && action.length() > 1) {
+                                switch (action.toLowerCase()) {
+                                    case "private":
+                                        if (isAdmin(whoClicked) || isOwner) {
+                                            TelePadsManager.instants.setPrivate(locations, !TelePadsManager.instants.isPrivate(locations));
+                                            messageTool.sendMessagePlayer((Player) whoClicked, ChatColor.GREEN + "Status changed to : " + TelePadsManager.instants.isPrivate(locations));
+                                            telepadGui.reDrawSettings();
+                                        }
+                                        break;
+                                    case "category":
+                                        if (isAdmin(whoClicked) || isOwner) {
+                                            List<String> cats = configManager.getCategoryNames((Player) whoClicked);
+                                            String category = TelePadsManager.instants.getCategory(locations);
+                                            category = getNext(cats, category);
+                                            TelePadsManager.instants.setCategory(locations, category);
+                                            telepadGui.reDrawSettings();
+                                        }
+                                        break;
+                                    case "icon":
+                                        if (isAdmin(whoClicked) || isOwner) {
+                                            changeIcons.put(whoClicked.getUniqueId(), locations);
+                                            messageTool.sendMessagePlayer((Player) whoClicked, ChatColor.GREEN + "Type Hand in chat for item in your main hand, or paste texture code for head, or cancel to cancel");
+                                            whoClicked.closeInventory();
+                                        }
+                                        break;
+                                    case "owner":
+                                        if (isAdmin(whoClicked)) {
+                                            TelePadsManager.instants.setAdmin(locations, !TelePadsManager.instants.isAdmin(locations));
+                                            messageTool.sendMessagePlayer((Player) whoClicked, ChatColor.GREEN + "Status changed to : " + TelePadsManager.instants.isAdmin(locations));
+                                            telepadGui.reDrawSettings();
+                                        }
+                                        break;
+                                    case "name":
+                                        if (isAdmin(whoClicked) || isOwner) {
+                                            changeNames.put(whoClicked.getUniqueId(), locations);
+                                            messageTool.sendMessagePlayer((Player) whoClicked, ChatColor.GREEN + "Type Name in chat, or cancel to cancel");
+                                            whoClicked.closeInventory();
+                                        }
+                                        break;
+                                    case "back":
+                                        TelepadGui gui = TelepadGui.getGui((Player) whoClicked);
+                                        gui.showGUI((Player) whoClicked);
+                                        break;
+                                    default:
+                                        throw new IllegalStateException("Unexpected value: " + action.toLowerCase());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    private static void TelepadGuiClicked(InventoryClickEvent event, HumanEntity whoClicked, InventoryView openInventory, Inventory clickedInventory) {
         if (openInventory.getTitle().equals(TelepadGui.guiName))
         {
             event.setCancelled(true);
@@ -100,42 +221,28 @@ public class MainListener  implements Listener {
             {
                 if (event.getSlot() > -1 && event.getSlot() < telepadGui.getSize()) {
                     ItemStack clicked = clickedInventory.getItem(event.getSlot());
-                    if (!TitanTelePads.tools.getItemStackTool().isEmpty(clicked)) {
-                        NBTTagCompound nbtTag = TitanTelePads.tools.getNBTTool().getNBTTag(clicked);
+                    if (!tools.getItemStackTool().isEmpty(clicked)) {
+                        NBTTagCompound nbtTag = tools.getNBTTool().getNBTTag(clicked);
                         if (nbtTag != null) {
                             if (nbtTag.e("padlocation")) {
-                                Location location = TitanTelePads.tools.getSerializeTool().deserializeLocation(nbtTag.l("padlocation"));
-                                if ((event.getClick() == ClickType.SHIFT_RIGHT && TitanTelePads.isAdmin(whoClicked)))
-                                {
-                                    TelePadsManager.instants.setAdmin(location, !TelePadsManager.instants.isAdmin(location));
-                                    TitanTelePads.messageTool.sendMessagePlayer((Player) whoClicked, ChatColor.GREEN + "Status changed to : " + TelePadsManager.instants.isAdmin(location));
-                                    telepadGui.drawMain();
-                                }else if (event.getClick() == ClickType.SHIFT_LEFT && TelePadsManager.instants.getOwner(location).equals(whoClicked.getUniqueId()))
-                                {
-                                    TelePadsManager.instants.setPrivate(location, !TelePadsManager.instants.isPrivate(location));
-                                    TitanTelePads.messageTool.sendMessagePlayer((Player) whoClicked, ChatColor.GREEN + "Status changed to : " + TelePadsManager.instants.isAdmin(location));
-                                    telepadGui.drawMain();
-                                }
-                                else if ((event.getClick() == ClickType.RIGHT && TitanTelePads.isAdmin(whoClicked))||
-                                        (event.getClick() == ClickType.RIGHT && TelePadsManager.instants.getOwner(location).equals(whoClicked.getUniqueId())))
-                                {
-                                    changeNames.put(whoClicked.getUniqueId(), location);
-                                    TitanTelePads.messageTool.sendMessagePlayer((Player) whoClicked, ChatColor.GREEN + "Type Name in chat, or cancel to cancel");
-                                    whoClicked.closeInventory();
+                                Location location = tools.getSerializeTool().deserializeLocation(nbtTag.l("padlocation"));
+                                if ((event.getClick() == ClickType.RIGHT && isAdmin(whoClicked))||
+                                        (event.getClick() == ClickType.RIGHT && TelePadsManager.instants.getOwner(location).equals(whoClicked.getUniqueId()))){
+                                    TelepadSettingsGui telepadSettingsGui = new TelepadSettingsGui();
+                                    telepadSettingsGui.showGUI((Player) whoClicked, location);
                                 } else {
-
-                                    int teleportDelay = TitanTelePads.configManager.getTeleportDelay();
+                                    int teleportDelay = configManager.getTeleportDelay();
                                     PressureManager pressureManager = new PressureManager(location, System.currentTimeMillis(), (Player) whoClicked);
                                     pressureManager.setTeleporting(true);
-                                    TitanTelePads.tools.getPlayerTool().startTeleport((Player) whoClicked, location.clone().add(0.5f, 0, 0.5f), teleportDelay);
+                                    tools.getPlayerTool().startTeleport((Player) whoClicked, location.clone().add(0.5f, 0, 0.5f), teleportDelay);
                                     new BukkitRunnable() {
                                         @Override
                                         public void run() {
-                                            location.getBlock().setType(TitanTelePads.configManager.getMaterial());
-                                            TitanTelePads.tools.getFloatingTextTool().changeFloatingText(location.clone().add(0.5f, 2, 0.5f), TelePadsManager.instants.getName(location.clone()));
+                                            location.getBlock().setType(configManager.getMaterial());
+                                            tools.getFloatingTextTool().changeFloatingText(location.clone().add(0.5f, 2, 0.5f), TelePadsManager.instants.getName(location.clone()));
                                             pressureManager.setTeleporting(false);
                                         }
-                                    }.runTaskLater(TitanTelePads.instants, (teleportDelay + 1)* 20L);
+                                    }.runTaskLater(instants, (teleportDelay + 1)* 20L);
                                     whoClicked.closeInventory();
 
                                 }
@@ -152,7 +259,8 @@ public class MainListener  implements Listener {
                                             telepadGui.drawMain();
                                             break;
                                         case "switch":
-                                            telepadGui.setToggle();
+                                            String cat = nbtTag.l("category");
+                                            telepadGui.setToggle(cat);
                                             telepadGui.drawMain();
                                             telepadGui.redrawBookButton();
                                             break;
@@ -200,7 +308,7 @@ public class MainListener  implements Listener {
             Boolean admin = TelePadsManager.instants.isAdmin(location);
             Boolean privacy = TelePadsManager.instants.isPrivate(location);
             TelePadsManager.instants.removeTelePad(location);
-            location.getWorld().dropItemNaturally(location, TitanTelePads.getTelePadItem(name, admin, privacy));
+            location.getWorld().dropItemNaturally(location, getTelePadItem(name, admin, privacy));
         }
     }
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
@@ -215,15 +323,22 @@ public class MainListener  implements Listener {
                 new PressureManager(location, System.currentTimeMillis(), player);
                 TelepadGui telepadGui = new TelepadGui();
                 telepadGui.showGUI(player);
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        TelepadSettingsGui gui = new TelepadSettingsGui();
+                        gui.showGUI(player, location);
+                    }
+                }.runTaskLater(instants, 1);
             }
             if (event.getAction() == Action.LEFT_CLICK_BLOCK)
             {
-                if ((TelePadsManager.instants.getOwner(location).equals(player.getUniqueId())) || (TitanTelePads.isAdmin(player))) {
+                if ((TelePadsManager.instants.getOwner(location).equals(player.getUniqueId())) || (isAdmin(player))) {
                     String name = TelePadsManager.instants.getName(location);
                     Boolean admin = TelePadsManager.instants.isAdmin(location);
                     Boolean privacy = TelePadsManager.instants.isPrivate(location);
                     TelePadsManager.instants.removeTelePad(location);
-                    location.getWorld().dropItemNaturally(location, TitanTelePads.getTelePadItem(name, admin, privacy));
+                    location.getWorld().dropItemNaturally(location, getTelePadItem(name, admin, privacy));
                     location.getBlock().setType(Material.AIR);
                 }
             }
@@ -235,11 +350,11 @@ public class MainListener  implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlock();
         ItemStack itemInHand = event.getItemInHand();
-        if (TitanTelePads.tools.getNBTTool().hasNBTTag(itemInHand, "telepad"))
+        if (tools.getNBTTool().hasNBTTag(itemInHand, "telepad"))
         {
-            String name = TitanTelePads.tools.getNBTTool().getNBTTag(itemInHand).l("telepad_name");
-            boolean admin = TitanTelePads.tools.getNBTTool().getNBTTag(itemInHand).q("telepad_admin");
-            boolean privacy = TitanTelePads.tools.getNBTTool().getNBTTag(itemInHand).q("telepad_privacy");
+            String name = tools.getNBTTool().getNBTTag(itemInHand).l("telepad_name");
+            boolean admin = tools.getNBTTool().getNBTTag(itemInHand).q("telepad_admin");
+            boolean privacy = tools.getNBTTool().getNBTTag(itemInHand).q("telepad_privacy");
             TelePadsManager.instants.placeTelePad(block.getLocation(), player, name, privacy, admin);
         }
 
