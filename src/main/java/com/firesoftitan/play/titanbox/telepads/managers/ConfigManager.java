@@ -20,6 +20,9 @@ public class ConfigManager {
     private HashMap<String, Integer> categoriesSlots;
     private String categoryDefault;
     private String categoryDefaultOpen;
+    private String resourcePackURL;
+    private boolean resourcePackEnabled;
+    private boolean enableVanillaOnly;
     public ConfigManager() {
         reload();
     }
@@ -30,16 +33,28 @@ public class ConfigManager {
         {
             configFile.set("settings.material", "SMOKER");
         }
+        if (!configFile.contains("settings.enable_old_vanilla_only_version"))
+        {
+            configFile.set("settings.enable_old_vanilla_only_version", false);
+        }
         if (!configFile.contains("settings.savetimer"))
         {
             configFile.set("settings.savetimer", 600);
         }
         if (!configFile.contains("settings.teleportdelay"))
         {
-            configFile.set("settings.teleportdelay", 1);
+            configFile.set("settings.enableVanillaOnly", 1);
         }
 
-        if (!configFile.contains("settings.category"))
+        if (!configFile.contains("settings.resourcepack.url"))
+        {
+            configFile.set("settings.resourcepack.url", "http://play.firesoftitan.com/global/022022/TitanBox.zip");
+        }
+        if (!configFile.contains("settings.resourcepack.enabled"))
+        {
+            configFile.set("settings.resourcepack.enabled", true);
+        }
+        if (!configFile.contains("settings.resourcePackEnabled"))
         {
             configFile.set("settings.category.All.slot", 0);
             configFile.set("settings.category.Admin.slot", 1);
@@ -74,6 +89,10 @@ public class ConfigManager {
         {
             categoryDefault = "Click to Changed";
         }
+        this.resourcePackURL = configFile.getString("settings.resourcepack.url");
+        this.resourcePackEnabled = configFile.getBoolean("settings.resourcepack.enabled");
+        this.enableVanillaOnly = configFile.getBoolean("settings.enable_old_vanilla_only_version");
+
         this.teleportdelay = configFile.getInt("settings.teleportdelay");
         this.savetime = configFile.getInt("settings.savetimer");
         try {
@@ -101,6 +120,19 @@ public class ConfigManager {
         }
         return permissionCats;
     }
+
+    public boolean isEnableVanillaOnly() {
+        return enableVanillaOnly;
+    }
+
+    public String getResourcePackURL() {
+        return resourcePackURL;
+    }
+
+    public boolean isResourcePackEnabled() {
+        return resourcePackEnabled;
+    }
+
     public List<String> getCategoryNames()
     {
         return new ArrayList<String>(categories.keySet());
@@ -128,6 +160,7 @@ public class ConfigManager {
         return categoryDefault;
     }
     public Material getMaterial() {
+        if (!enableVanillaOnly) return Material.WHITE_CARPET;
         return this.material;
     }
 

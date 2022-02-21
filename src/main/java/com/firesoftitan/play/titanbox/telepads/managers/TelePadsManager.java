@@ -6,13 +6,17 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static com.firesoftitan.play.titanbox.telepads.TitanTelePads.tools;
 
 
 public class TelePadsManager {
@@ -58,7 +62,7 @@ public class TelePadsManager {
     {
         String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
         configFile.set("telepads." + key + ".name", name);
-        TitanTelePads.tools.getFloatingTextTool().changeFloatingText(location,  name);
+        TitanTelePads.tools.getFloatingTextTool().changeFloatingText(location.clone().add(0.5f, 2, 0.5f),  name);
     }
     public ItemStack getIcon(Location location)
     {
@@ -133,6 +137,7 @@ public class TelePadsManager {
     {
         String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
         TitanTelePads.tools.getFloatingTextTool().deleteFloatingText(location.clone().add(0.5f, 2, 0.5f));
+        TitanTelePads.tools.getFloatingTextTool().deleteFloatingText(location.clone().add(0.5f, 0, 0.5f));
         configFile.delete("telepads." + key);
         for(int i = 0; i < output.size(); i++)
         {
@@ -179,8 +184,6 @@ public class TelePadsManager {
         } catch (IOException e) {
 
         }
-
-
         output.add(location.clone());
         TitanTelePads.tools.getFloatingTextTool().setFloatingText(location.add(0.5f, 2, 0.5f), name);
     }

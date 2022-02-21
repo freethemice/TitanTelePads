@@ -9,10 +9,12 @@ import com.firesoftitan.play.titanbox.telepads.managers.TelePadsManager;
 import net.minecraft.nbt.NBTTagCompound;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
@@ -87,7 +89,7 @@ public class TitanTelePads extends JavaPlugin {
                         if (args.length > 1)
                         {
                             Player player = Bukkit.getPlayer(args[1]);
-                            ItemStack telepads = getTelePadItem(System.currentTimeMillis() + "", false, false);
+                            ItemStack telepads = getTelePadItem(System.currentTimeMillis() + "", false, false, null);
                             player.getInventory().addItem(telepads.clone());
                             return true;
                         }
@@ -97,14 +99,18 @@ public class TitanTelePads extends JavaPlugin {
         }
         return true;
     }
-
     @NotNull
-    public static ItemStack getTelePadItem(String name, boolean admin, boolean privacy) {
+    public static ItemStack getTelePadItem(String name, boolean admin, boolean privacy, ItemStack icon) {
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
         nbtTagCompound.a("telepad" , true);
         nbtTagCompound.a("telepad_name" , name);
         nbtTagCompound.a("telepad_admin" , admin);
         nbtTagCompound.a("telepad_privacy" , privacy);
+        if (!tools.getItemStackTool().isEmpty(icon))
+        {
+            String itemStack = tools.getSerializeTool().serializeItemStack(icon.clone());
+            nbtTagCompound.a("telepad_icon" , itemStack);
+        }
         ItemStack telepads = new ItemStack(configManager.getMaterial());
         telepads = tools.getNBTTool().setNBTTag(telepads, nbtTagCompound);
         telepads = tools.getItemStackTool().changeName(telepads, ChatColor.AQUA + "Teleport Pad");
@@ -114,6 +120,11 @@ public class TitanTelePads extends JavaPlugin {
         if (privacy) privacylore = "Private";
         String[] lores = {"Name: " + ChatColor.WHITE + name, privacylore, adminlore};
         telepads = tools.getItemStackTool().addLore(true, telepads, lores);
+        if (!configManager.isEnableVanillaOnly()) {
+            ItemMeta itemMeta = telepads.getItemMeta();
+            itemMeta.setCustomModelData(70001);
+            telepads.setItemMeta(itemMeta);
+        }
         return telepads;
     }
 
