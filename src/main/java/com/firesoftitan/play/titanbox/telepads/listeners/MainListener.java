@@ -339,8 +339,9 @@ public class MainListener  implements Listener {
             Boolean admin = TelePadsManager.instants.isAdmin(location);
             Boolean privacy = TelePadsManager.instants.isPrivate(location);
             ItemStack icon = TelePadsManager.instants.getIcon(location);
+            String category = TelePadsManager.instants.getCategory(location);
             TelePadsManager.instants.removeTelePad(location);
-            location.getWorld().dropItemNaturally(location, getTelePadItem(name, admin, privacy, icon));
+            location.getWorld().dropItemNaturally(location, getTelePadItem(name, admin, privacy, icon, category));
         }
     }
 
@@ -373,8 +374,9 @@ public class MainListener  implements Listener {
                     Boolean admin = TelePadsManager.instants.isAdmin(location);
                     Boolean privacy = TelePadsManager.instants.isPrivate(location);
                     ItemStack icon = TelePadsManager.instants.getIcon(location);
+                    String category = TelePadsManager.instants.getCategory(location);
                     TelePadsManager.instants.removeTelePad(location);
-                    location.getWorld().dropItemNaturally(location, getTelePadItem(name, admin, privacy, icon));
+                    location.getWorld().dropItemNaturally(location, getTelePadItem(name, admin, privacy, icon, category));
                     location.getBlock().setType(Material.AIR);
                 }
             }
@@ -392,7 +394,12 @@ public class MainListener  implements Listener {
             boolean admin = tools.getNBTTool().getNBTTag(itemInHand).q("telepad_admin");
             boolean privacy = tools.getNBTTool().getNBTTag(itemInHand).q("telepad_privacy");
             String icon = tools.getNBTTool().getNBTTag(itemInHand).l("telepad_icon");
+            String category = tools.getNBTTool().getNBTTag(itemInHand).l("telepad_category");
             TelePadsManager.instants.placeTelePad(block.getLocation(), player, name, privacy, admin);
+            if (category != null && category.length() > 1)
+            {
+                TelePadsManager.instants.setCategory(block.getLocation(), category);
+            }
             if (icon != null && icon.length() > 1 ) {
                 ItemStack itemStack = tools.getSerializeTool().deserializeItemStackSimple(icon);
                 TelePadsManager.instants.setIcon(block.getLocation(), itemStack.clone());

@@ -19,6 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -89,7 +90,7 @@ public class TitanTelePads extends JavaPlugin {
                         if (args.length > 1)
                         {
                             Player player = Bukkit.getPlayer(args[1]);
-                            ItemStack telepads = getTelePadItem(System.currentTimeMillis() + "", false, false, null);
+                            ItemStack telepads = getTelePadItem(System.currentTimeMillis() + "", false, false, null, configManager.getCategoryDefault());
                             player.getInventory().addItem(telepads.clone());
                             return true;
                         }
@@ -100,12 +101,16 @@ public class TitanTelePads extends JavaPlugin {
         return true;
     }
     @NotNull
-    public static ItemStack getTelePadItem(String name, boolean admin, boolean privacy, ItemStack icon) {
+    public static ItemStack getTelePadItem(String name, boolean admin, boolean privacy, ItemStack icon, String category) {
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
         nbtTagCompound.a("telepad" , true);
         nbtTagCompound.a("telepad_name" , name);
         nbtTagCompound.a("telepad_admin" , admin);
         nbtTagCompound.a("telepad_privacy" , privacy);
+        if (category != null && category.length() > 1)
+        {
+            nbtTagCompound.a("telepad_category" , category);
+        }
         if (!tools.getItemStackTool().isEmpty(icon))
         {
             String itemStack = tools.getSerializeTool().serializeItemStack(icon.clone());
@@ -114,11 +119,17 @@ public class TitanTelePads extends JavaPlugin {
         ItemStack telepads = new ItemStack(configManager.getMaterial());
         telepads = tools.getNBTTool().setNBTTag(telepads, nbtTagCompound);
         telepads = tools.getItemStackTool().changeName(telepads, ChatColor.AQUA + "Teleport Pad");
-        String adminlore = "";
+        if (admin) telepads = tools.getItemStackTool().changeName(telepads, ChatColor.RED + "ADMIN " + ChatColor.AQUA + "Teleport Pad");
+
+        List<String> lores = new ArrayList<String>();
         String privacylore = "Public";
-        if (admin) adminlore = "Admin";
         if (privacy) privacylore = "Private";
-        String[] lores = {"Name: " + ChatColor.WHITE + name, privacylore, adminlore};
+
+        lores.add("Name: " + ChatColor.WHITE + name);
+        if (!tools.getItemStackTool().isEmpty(icon)) lores.add(ChatColor.GREEN + "Icon saved!");
+        lores.add(privacylore);
+        if (category != null && category.length() > 1) lores.add("Category: " +  ChatColor.WHITE + category);
+
         telepads = tools.getItemStackTool().addLore(true, telepads, lores);
         if (!configManager.isEnableVanillaOnly()) {
             ItemMeta itemMeta = telepads.getItemMeta();

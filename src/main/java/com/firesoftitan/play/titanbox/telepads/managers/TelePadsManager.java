@@ -9,6 +9,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.IOException;
@@ -83,7 +84,14 @@ public class TelePadsManager {
 
             }
         }
-        return configFile.getItem("telepads." + key + ".icon");
+        ItemStack item = configFile.getItem("telepads." + key + ".icon");
+        if (item.getType() == Material.WHITE_CARPET)
+        {
+            ItemMeta itemMeta = item.getItemMeta();
+            itemMeta.setCustomModelData(70001);
+            item.setItemMeta(itemMeta);
+        }
+        return item.clone();
     }
     public void setIcon(Location location, ItemStack icon) {
         String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
