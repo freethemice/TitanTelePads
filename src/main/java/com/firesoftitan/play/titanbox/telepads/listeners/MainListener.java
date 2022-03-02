@@ -1,6 +1,7 @@
 package com.firesoftitan.play.titanbox.telepads.listeners;
 
 import com.firesoftitan.play.titanbox.telepads.TitanTelePads;
+import com.firesoftitan.play.titanbox.telepads.enums.TitanItemTypesEnum;
 import com.firesoftitan.play.titanbox.telepads.guis.TelepadGui;
 import com.firesoftitan.play.titanbox.telepads.guis.TelepadSettingsGui;
 import com.firesoftitan.play.titanbox.telepads.managers.PressureManager;
@@ -11,16 +12,15 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.block.*;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
@@ -37,8 +37,8 @@ import static com.firesoftitan.play.titanbox.telepads.TitanTelePads.*;
 
 public class MainListener  implements Listener {
 
-    private static HashMap<UUID, Location> changeNames = new HashMap<UUID, Location>();
-    private static HashMap<UUID, Location> changeIcons = new HashMap<UUID, Location>();
+    private  HashMap<UUID, Location> changeNames = new HashMap<UUID, Location>();
+    private  HashMap<UUID, Location> changeIcons = new HashMap<UUID, Location>();
     public MainListener(){
 
     }
@@ -46,9 +46,48 @@ public class MainListener  implements Listener {
         PluginManager pm = instants.getServer().getPluginManager();
         pm.registerEvents(this, instants);
     }
+    @EventHandler
+    public void onBlockPistonExtend(BlockPistonExtendEvent event) {
+        List<Block> blockList = event.getBlocks();
+        for(Block block: blockList)
+        {
+            Location location = block.getLocation();
+            if (TelePadsManager.instants.isTelePad(location))
+            {
+                event.setCancelled(true);
+            }
+        }
+    }
+    @EventHandler
+    public void onBlockPistonRetract(BlockPistonRetractEvent event) {
+        List<Block> blockList = event.getBlocks();
+        for(Block block: blockList)
+        {
+            Location location = block.getLocation();
+            if (TelePadsManager.instants.isTelePad(location))
+            {
+                event.setCancelled(true);
+            }
+        }
+    }
+    @EventHandler
+    public void onBlockFromToEvent (BlockFromToEvent  event)
+    {
+        Block block = event.getToBlock();
+        Location location = block.getLocation();
+        if (TelePadsManager.instants.isTelePad(location))
+        {
+            event.setCancelled(true);
+        }
+    }
+    @EventHandler
+    public void onCraftItemEvent(CraftItemEvent event)
+    {
+
+    }
 
     @EventHandler
-    public static void onPlayerLoginEvent(PlayerLoginEvent event)
+    public void onPlayerLoginEvent(PlayerLoginEvent event)
     {
         Player player = event.getPlayer();
         new BukkitRunnable() {
@@ -75,7 +114,7 @@ public class MainListener  implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
-    public static void onAsyncPlayerChatEvent(AsyncPlayerChatEvent event)
+    public void onAsyncPlayerChatEvent(AsyncPlayerChatEvent event)
     {
         Player player = event.getPlayer();
         if (changeIcons.containsKey(player.getUniqueId()))
@@ -145,6 +184,7 @@ public class MainListener  implements Listener {
         Inventory clickedInventory = event.getClickedInventory();
         TelepadGuiClicked(event, whoClicked, openInventory, clickedInventory);
         TelepadSettingsGuiClicked(event, whoClicked, openInventory, clickedInventory);
+
 
     }
     private void TelepadSettingsGuiClicked(InventoryClickEvent event, HumanEntity whoClicked, InventoryView openInventory, Inventory clickedInventory) {
@@ -325,16 +365,15 @@ public class MainListener  implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlock();
         Location location = block.getLocation();
-        checkBreak(event, location);
+        if (checkPlusBreak(location)) event.setDropItems(false);
         location = block.getLocation().add(0,1,0);
-        checkBreak(event, location);
+        if (checkPlusBreak(location)) event.setDropItems(false);
 
     }
 
-    private void checkBreak(BlockBreakEvent event, Location location) {
+    private boolean checkPlusBreak(Location location) {
         if (TelePadsManager.instants.isTelePad(location))
         {
-            event.setDropItems(false);
             String name = TelePadsManager.instants.getName(location);
             Boolean admin = TelePadsManager.instants.isAdmin(location);
             Boolean privacy = TelePadsManager.instants.isPrivate(location);
@@ -342,6 +381,22 @@ public class MainListener  implements Listener {
             String category = TelePadsManager.instants.getCategory(location);
             TelePadsManager.instants.removeTelePad(location);
             location.getWorld().dropItemNaturally(location, getTelePadItem(name, admin, privacy, icon, category));
+            return true;
+        }
+        return false;
+    }
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    public void  onPlayerInteractEvent(ProjectileLaunchEvent event)
+    {
+        if (event.getEntity().getShooter() instanceof Player)
+        {
+            Player shooter = (Player) event.getEntity().getShooter();
+
+            if (event.getEntity().getType() == EntityType.ENDER_PEARL) {
+                ItemStack itemInMainHand = shooter.getInventory().getItemInMainHand();
+                String titanItemID = tools.getItemStackTool().getTitanItemID(itemInMainHand);
+                if (titanItemID != null && titanItemID.length() > 0) event.setCancelled(true);
+            }
         }
     }
 
@@ -388,7 +443,9 @@ public class MainListener  implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlock();
         ItemStack itemInHand = event.getItemInHand();
-        if (tools.getNBTTool().hasNBTTag(itemInHand, "telepad"))
+        String titanItemID = tools.getItemStackTool().getTitanItemID(itemInHand);
+
+        if (tools.getNBTTool().hasNBTTag(itemInHand, "telepad") || titanItemID.equals(TitanItemTypesEnum.TELEPAD.getID()))
         {
             String name = tools.getNBTTool().getNBTTag(itemInHand).l("telepad_name");
             boolean admin = tools.getNBTTool().getNBTTag(itemInHand).q("telepad_admin");

@@ -46,9 +46,10 @@ public class ConfigManager {
             configFile.set("settings.enableVanillaOnly", 1);
         }
 
-        if (!configFile.contains("settings.resourcepack.url"))
+        if (!configFile.contains("settings.resourcepack.url") ||
+                configFile.getString("settings.resourcepack.url").equals("http://play.firesoftitan.com/global/022022/TitanBox.zip"))
         {
-            configFile.set("settings.resourcepack.url", "http://play.firesoftitan.com/global/022022/TitanBox.zip");
+            configFile.set("settings.resourcepack.url", "http://play.firesoftitan.com/global/030122/TitanBox.zip");
         }
         if (!configFile.contains("settings.resourcepack.enabled"))
         {

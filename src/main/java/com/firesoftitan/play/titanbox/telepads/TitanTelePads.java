@@ -2,14 +2,16 @@ package com.firesoftitan.play.titanbox.telepads;
 
 import com.firesoftitan.play.titanbox.libs.tools.LibsMessageTool;
 import com.firesoftitan.play.titanbox.libs.tools.Tools;
+import com.firesoftitan.play.titanbox.telepads.enums.TitanItemTypesEnum;
 import com.firesoftitan.play.titanbox.telepads.listeners.MainListener;
 import com.firesoftitan.play.titanbox.telepads.managers.AutoUpdateManager;
 import com.firesoftitan.play.titanbox.telepads.managers.ConfigManager;
+import com.firesoftitan.play.titanbox.telepads.managers.RecipeManager;
 import com.firesoftitan.play.titanbox.telepads.managers.TelePadsManager;
+import com.firesoftitan.play.titanbox.telepads.runnables.SaveRunnable;
 import net.minecraft.nbt.NBTTagCompound;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -25,6 +27,7 @@ import java.util.List;
 
 public class TitanTelePads extends JavaPlugin {
     public static Tools tools;
+    public static RecipeManager recipeManager;
     public static ConfigManager configManager;
     public static TitanTelePads instants;
     public static MainListener mainListener;
@@ -32,24 +35,18 @@ public class TitanTelePads extends JavaPlugin {
     public static LibsMessageTool messageTool;
     public void onEnable() {
         instants = this;
-        tools = new Tools(this);
+        tools = new Tools(this, new SaveRunnable());
         messageTool = tools.getMessageTool();
         mainListener = new MainListener();
         mainListener.registerEvents();
         configManager = new ConfigManager();
+        recipeManager = new RecipeManager();
         new BukkitRunnable() {
             @Override
             public void run() {
                 new TelePadsManager();
             }
         }.runTaskLater(this, 2);
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                TelePadsManager.instants.save();
-            }
-        }.runTaskTimer(this, configManager.getSaveTime() *20, configManager.getSaveTime() *20);
-
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -84,11 +81,22 @@ public class TitanTelePads extends JavaPlugin {
                         configManager.reload();
                         if (sender instanceof Player) messageTool.sendMessagePlayer((Player) sender, "config reloaded!");
                         else messageTool.sendMessageSystem("config reloaded!");
+                        return true;
                     }
                     if (name.equals("give"))
                     {
                         if (args.length > 1)
                         {
+                            if (args.length > 2) {
+                                for (TitanItemTypesEnum typesEnum : TitanItemTypesEnum.values()) {
+                                    if (args[1].toUpperCase().equalsIgnoreCase(typesEnum.getID())) {
+                                        Player player = Bukkit.getPlayer(args[2]);
+                                        ItemStack telepads = getPartItem(typesEnum);
+                                        player.getInventory().addItem(telepads.clone());
+                                        return true;
+                                    }
+                                }
+                            }
                             Player player = Bukkit.getPlayer(args[1]);
                             ItemStack telepads = getTelePadItem(System.currentTimeMillis() + "", false, false, null, configManager.getCategoryDefault());
                             player.getInventory().addItem(telepads.clone());
@@ -97,13 +105,52 @@ public class TitanTelePads extends JavaPlugin {
                     }
                 }
             }
+            if (sender instanceof Player)
+            {
+                Player player = (Player) sender;
+                messageTool.sendMessagePlayer(player, "/tep reload - Reloads config files");
+                messageTool.sendMessagePlayer(player, "/tep give <name> - Give player (name) a telepad");
+                messageTool.sendMessagePlayer(player, "/tep give <telepad,wires,wiring_box,teleporter_box> <name> - Give player (name) a telepad ,wires, wiring_box, or teleporter_box");
+            }
+            else
+            {
+                messageTool.sendMessageSystem("/tep reload - Reloads config files");
+                messageTool.sendMessageSystem("/tep give <name> - Give player (name) a telepad");
+                messageTool.sendMessageSystem("/tep give <telepads,wires,wiring_box,teleporter_box> <name> - Give player (name) a telepads ,wires, wiring_box, or teleporter_box");
+            }
         }
+
         return true;
+    }
+    public static boolean isItemTitanItem(TitanItemTypesEnum ItemType, ItemStack check)
+    {
+        if (tools.getItemStackTool().isEmpty(check)) return false;
+        String titanitem_id = tools.getItemStackTool().getTitanItemID(check);
+        if (titanitem_id.equals(ItemType.getID())) return true;
+        return false;
+    }
+    @NotNull
+    public static ItemStack getPartItem(TitanItemTypesEnum ItemType) {
+        if (ItemType == TitanItemTypesEnum.TELEPAD)
+        {
+            return getTelePadItem(System.currentTimeMillis() + "", false, false, null, configManager.getCategoryDefault());
+        }
+        ItemStack telepads = new ItemStack(ItemType.getMaterial());
+        telepads = tools.getItemStackTool().setTitanItemID(telepads, ItemType.getID());
+        telepads = tools.getItemStackTool().setPlaceable(telepads, ItemType.isPlaceable());
+        telepads = tools.getItemStackTool().changeName(telepads, ChatColor.AQUA + ItemType.getName());
+        telepads = tools.getItemStackTool().addLore(true, telepads, ItemType.getLore());
+
+        if (!configManager.isEnableVanillaOnly()) {
+            ItemMeta itemMeta = telepads.getItemMeta();
+            itemMeta.setCustomModelData(ItemType.getDataID());
+            telepads.setItemMeta(itemMeta);
+        }
+        return telepads.clone();
     }
     @NotNull
     public static ItemStack getTelePadItem(String name, boolean admin, boolean privacy, ItemStack icon, String category) {
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
-        nbtTagCompound.a("telepad" , true);
         nbtTagCompound.a("telepad_name" , name);
         nbtTagCompound.a("telepad_admin" , admin);
         nbtTagCompound.a("telepad_privacy" , privacy);
@@ -118,7 +165,9 @@ public class TitanTelePads extends JavaPlugin {
         }
         ItemStack telepads = new ItemStack(configManager.getMaterial());
         telepads = tools.getNBTTool().setNBTTag(telepads, nbtTagCompound);
-        telepads = tools.getItemStackTool().changeName(telepads, ChatColor.AQUA + "Teleport Pad");
+        telepads = tools.getItemStackTool().setTitanItemID(telepads, TitanItemTypesEnum.TELEPAD.getID());
+        telepads = tools.getItemStackTool().setPlaceable(telepads, TitanItemTypesEnum.TELEPAD.isPlaceable());
+        telepads = tools.getItemStackTool().changeName(telepads, ChatColor.AQUA + TitanItemTypesEnum.TELEPAD.getName());
         if (admin) telepads = tools.getItemStackTool().changeName(telepads, ChatColor.RED + "ADMIN " + ChatColor.AQUA + "Teleport Pad");
 
         List<String> lores = new ArrayList<String>();
@@ -133,10 +182,10 @@ public class TitanTelePads extends JavaPlugin {
         telepads = tools.getItemStackTool().addLore(true, telepads, lores);
         if (!configManager.isEnableVanillaOnly()) {
             ItemMeta itemMeta = telepads.getItemMeta();
-            itemMeta.setCustomModelData(70001);
+            itemMeta.setCustomModelData(TitanItemTypesEnum.TELEPAD.getDataID());
             telepads.setItemMeta(itemMeta);
         }
-        return telepads;
+        return telepads.clone();
     }
 
     public void saveALL()
