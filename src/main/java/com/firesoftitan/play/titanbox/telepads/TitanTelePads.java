@@ -4,7 +4,6 @@ import com.firesoftitan.play.titanbox.libs.tools.LibsMessageTool;
 import com.firesoftitan.play.titanbox.libs.tools.Tools;
 import com.firesoftitan.play.titanbox.telepads.enums.TitanItemTypesEnum;
 import com.firesoftitan.play.titanbox.telepads.listeners.MainListener;
-import com.firesoftitan.play.titanbox.telepads.managers.AutoUpdateManager;
 import com.firesoftitan.play.titanbox.telepads.managers.ConfigManager;
 import com.firesoftitan.play.titanbox.telepads.managers.RecipeManager;
 import com.firesoftitan.play.titanbox.telepads.managers.TelePadsManager;
@@ -31,11 +30,10 @@ public class TitanTelePads extends JavaPlugin {
     public static ConfigManager configManager;
     public static TitanTelePads instants;
     public static MainListener mainListener;
-    public static boolean update = false;
     public static LibsMessageTool messageTool;
     public void onEnable() {
         instants = this;
-        tools = new Tools(this, new SaveRunnable());
+        tools = new Tools(this, new SaveRunnable(), 99835);
         messageTool = tools.getMessageTool();
         mainListener = new MainListener();
         mainListener.registerEvents();
@@ -47,20 +45,6 @@ public class TitanTelePads extends JavaPlugin {
                 new TelePadsManager();
             }
         }.runTaskLater(this, 2);
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                new AutoUpdateManager(TitanTelePads.this, 99835).getVersion(version -> {
-                    if (TitanTelePads.this.getDescription().getVersion().equalsIgnoreCase(version)) {
-                        messageTool.sendMessageSystem("Plugin is up to date.");
-                    } else {
-                        TitanTelePads.update = true;
-                        messageTool.sendMessageSystem("There is a new update available.");
-                        messageTool.sendMessageSystem( "https://www.spigotmc.org/resources/titan-teleport-pads.99835");
-                    }
-                });
-            }
-        }.runTaskLater(this,20);
     }
     public static String getNext(List<String> myList, String uid) {
         int idx = myList.indexOf(uid);

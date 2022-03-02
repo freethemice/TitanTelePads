@@ -97,20 +97,6 @@ public class MainListener  implements Listener {
             }
         }.runTaskLater(instants, 20);
 
-        if (isAdmin(player)) {
-            if (update) {
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        messageTool.sendMessagePlayer(player,"There is a new update available.");
-                        messageTool.sendMessagePlayer(player, "https://www.spigotmc.org/resources/titan-teleport-pads.99835/");
-
-                    }
-                }.runTaskLater(instants, 20);
-            }
-        }
-
-
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
