@@ -184,9 +184,9 @@ public class MainListener  implements Listener {
                 if (event.getSlot() > -1 && event.getSlot() < telepadGui.getSize()) {
                     ItemStack clicked = clickedInventory.getItem(event.getSlot());
                     if (!tools.getItemStackTool().isEmpty(clicked)) {
-                        NBTTagCompound nbtTag = tools.getNBTTool().getNBTTag(clicked);
-                        if (nbtTag != null) {
-                            String action = nbtTag.l("buttonaction");
+                        if (tools.getNBTTool().containsKey(clicked, "buttonaction"))
+                        {
+                            String action = tools.getNBTTool().getString(clicked, "buttonaction");
                             if (action != null && action.length() > 1) {
                                 switch (action.toLowerCase()) {
                                     case "private":
@@ -250,10 +250,9 @@ public class MainListener  implements Listener {
                 if (event.getSlot() > -1 && event.getSlot() < telepadGui.getSize()) {
                     ItemStack clicked = clickedInventory.getItem(event.getSlot());
                     if (!tools.getItemStackTool().isEmpty(clicked)) {
-                        NBTTagCompound nbtTag = tools.getNBTTool().getNBTTag(clicked);
-                        if (nbtTag != null) {
-                            if (nbtTag.e("padlocation")) {
-                                Location location = tools.getSerializeTool().deserializeLocation(nbtTag.l("padlocation"));
+                        if (tools.getNBTTool().containsKey(clicked, "padlocation"))
+                        {
+                                Location location = tools.getNBTTool().getLocation(clicked, "padlocation");
                                 if ((event.getClick() == ClickType.RIGHT && isAdmin(whoClicked))||
                                         (event.getClick() == ClickType.RIGHT && TelePadsManager.instants.getOwner(location).equals(whoClicked.getUniqueId()))){
                                     TelepadSettingsGui telepadSettingsGui = new TelepadSettingsGui();
@@ -269,7 +268,7 @@ public class MainListener  implements Listener {
 
                                 }
                             } else {
-                                String action = nbtTag.l("buttonaction");
+                                String action = tools.getNBTTool().getString(clicked, "buttonaction");
                                 if (action != null && action.length() > 1) {
                                     switch (action.toLowerCase()) {
                                         case "left":
@@ -281,7 +280,7 @@ public class MainListener  implements Listener {
                                             telepadGui.drawMain();
                                             break;
                                         case "switch":
-                                            String cat = nbtTag.l("category");
+                                            String cat = tools.getNBTTool().getString(clicked, "category");
                                             telepadGui.setToggle(cat);
                                             telepadGui.drawMain();
                                             telepadGui.redrawBookButton();
@@ -291,7 +290,6 @@ public class MainListener  implements Listener {
 
 
                             }
-                        }
                     }
                 }
             }
@@ -431,13 +429,13 @@ public class MainListener  implements Listener {
         ItemStack itemInHand = event.getItemInHand();
         String titanItemID = tools.getItemStackTool().getTitanItemID(itemInHand);
 
-        if (tools.getNBTTool().hasNBTTag(itemInHand, "telepad") || titanItemID.equals(TitanItemTypesEnum.TELEPAD.getID()))
+        if (tools.getNBTTool().containsKey(itemInHand, "telepad") || titanItemID.equals(TitanItemTypesEnum.TELEPAD.getID()))
         {
-            String name = tools.getNBTTool().getNBTTag(itemInHand).l("telepad_name");
-            boolean admin = tools.getNBTTool().getNBTTag(itemInHand).q("telepad_admin");
-            boolean privacy = tools.getNBTTool().getNBTTag(itemInHand).q("telepad_privacy");
-            String icon = tools.getNBTTool().getNBTTag(itemInHand).l("telepad_icon");
-            String category = tools.getNBTTool().getNBTTag(itemInHand).l("telepad_category");
+            String name = tools.getNBTTool().getString(itemInHand, "telepad_name");
+            boolean admin = tools.getNBTTool().getBoolean(itemInHand, "telepad_admin");
+            boolean privacy = tools.getNBTTool().getBoolean(itemInHand, "telepad_privacy");
+            String icon = tools.getNBTTool().getString(itemInHand, "telepad_icon");
+            String category = tools.getNBTTool().getString(itemInHand, "telepad_category");
             TelePadsManager.instants.placeTelePad(block.getLocation(), player, name, privacy, admin);
             if (category != null && category.length() > 1)
             {

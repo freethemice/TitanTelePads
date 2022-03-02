@@ -55,9 +55,7 @@ public class TelepadSettingsGui {
 
         button = new ItemStack(Material.NAME_TAG);
         button = TitanTelePads.tools.getItemStackTool().changeName(button, "Name: " + ChatColor.WHITE + padsManager.getName(locations));
-        nbtTagCompound = TitanTelePads.tools.getNBTTool().getNBTTag(button);
-        nbtTagCompound.a("buttonaction", "name");
-        button = TitanTelePads.tools.getNBTTool().setNBTTag(button, nbtTagCompound);
+        button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "name");
         myGui.setItem(slot, button.clone());
         slot++;
 
@@ -67,42 +65,32 @@ public class TelepadSettingsGui {
             button = new ItemStack(Material.BOOKSHELF);
             button = TitanTelePads.tools.getItemStackTool().changeName(button, "Owner: " + ChatColor.DARK_RED + "ADMIN");
         }
-        nbtTagCompound = TitanTelePads.tools.getNBTTool().getNBTTag(button);
-        nbtTagCompound.a("buttonaction", "owner");
-        button = TitanTelePads.tools.getNBTTool().setNBTTag(button, nbtTagCompound);
+        button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "owner");
         myGui.setItem(slot, button.clone());
         slot++;
 
         button = new ItemStack(Material.LIME_CONCRETE);
         if (padsManager.isPrivate(locations)) button = new ItemStack(Material.RED_CONCRETE);
         button = TitanTelePads.tools.getItemStackTool().changeName(button, "Private: " + ChatColor.WHITE + padsManager.isPrivate(locations));
-        nbtTagCompound = TitanTelePads.tools.getNBTTool().getNBTTag(button);
-        nbtTagCompound.a("buttonaction", "private");
-        button = TitanTelePads.tools.getNBTTool().setNBTTag(button, nbtTagCompound);
+        button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "private");
         myGui.setItem(slot, button.clone());
         slot++;
 
         button = new ItemStack(Material.LECTERN);
         button = TitanTelePads.tools.getItemStackTool().changeName(button, "Category: " + ChatColor.WHITE + padsManager.getCategory(locations));
-        nbtTagCompound = TitanTelePads.tools.getNBTTool().getNBTTag(button);
-        nbtTagCompound.a("buttonaction", "category");
-        button = TitanTelePads.tools.getNBTTool().setNBTTag(button, nbtTagCompound);
+        button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "category");
         myGui.setItem(slot, button.clone());
         slot++;
 
         button = padsManager.getIcon(locations);
         button = TitanTelePads.tools.getItemStackTool().changeName(button, "Icon");
-        nbtTagCompound = TitanTelePads.tools.getNBTTool().getNBTTag(button);
-        nbtTagCompound.a("buttonaction", "icon");
-        button = TitanTelePads.tools.getNBTTool().setNBTTag(button, nbtTagCompound);
+        button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "icon");
         myGui.setItem(slot, button.clone());
         slot++;
 
         button = new ItemStack(Material.ARROW);
         button = TitanTelePads.tools.getItemStackTool().changeName(button, "Back");
-        nbtTagCompound = TitanTelePads.tools.getNBTTool().getNBTTag(button);
-        nbtTagCompound.a("buttonaction", "back");
-        button = TitanTelePads.tools.getNBTTool().setNBTTag(button, nbtTagCompound);
+        button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "Back");
         myGui.setItem(slot, button.clone());
         slot++;
     }

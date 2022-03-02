@@ -134,21 +134,17 @@ public class TitanTelePads extends JavaPlugin {
     }
     @NotNull
     public static ItemStack getTelePadItem(String name, boolean admin, boolean privacy, ItemStack icon, String category) {
-        NBTTagCompound nbtTagCompound = new NBTTagCompound();
-        nbtTagCompound.a("telepad_name" , name);
-        nbtTagCompound.a("telepad_admin" , admin);
-        nbtTagCompound.a("telepad_privacy" , privacy);
-        if (category != null && category.length() > 1)
-        {
-            nbtTagCompound.a("telepad_category" , category);
-        }
-        if (!tools.getItemStackTool().isEmpty(icon))
-        {
-            String itemStack = tools.getSerializeTool().serializeItemStack(icon.clone());
-            nbtTagCompound.a("telepad_icon" , itemStack);
-        }
         ItemStack telepads = new ItemStack(configManager.getMaterial());
-        telepads = tools.getNBTTool().setNBTTag(telepads, nbtTagCompound);
+        telepads = tools.getNBTTool().set(telepads, "telepad_name" , name);
+        telepads = tools.getNBTTool().set(telepads, "telepad_admin" , admin);
+        telepads = tools.getNBTTool().set(telepads, "telepad_privacy" , privacy);
+        if (category != null && category.length() > 1) {
+            telepads = tools.getNBTTool().set(telepads, "telepad_category" , category);
+        }
+        if (!tools.getItemStackTool().isEmpty(icon)) {
+            String itemStack = tools.getSerializeTool().serializeItemStack(icon.clone());
+            telepads = tools.getNBTTool().set(telepads, "telepad_icon" , itemStack);
+        }
         telepads = tools.getItemStackTool().setTitanItemID(telepads, TitanItemTypesEnum.TELEPAD.getID());
         telepads = tools.getItemStackTool().setPlaceable(telepads, TitanItemTypesEnum.TELEPAD.isPlaceable());
         telepads = tools.getItemStackTool().changeName(telepads, ChatColor.AQUA + TitanItemTypesEnum.TELEPAD.getName());

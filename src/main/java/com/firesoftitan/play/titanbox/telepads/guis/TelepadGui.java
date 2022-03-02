@@ -47,9 +47,7 @@ public class TelepadGui {
         }
         button = new ItemStack(Material.ARROW);
         button = TitanTelePads.tools.getItemStackTool().changeName(button, "Scroll Down");
-        NBTTagCompound nbtTagCompound = TitanTelePads.tools.getNBTTool().getNBTTag(button);
-        nbtTagCompound.a("buttonaction", "left");
-        button = TitanTelePads.tools.getNBTTool().setNBTTag(button, nbtTagCompound);
+        button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "left");
         myGui.setItem(size - 9, button.clone());
 
         redrawBookButton();
@@ -57,9 +55,7 @@ public class TelepadGui {
 
         button = new ItemStack(Material.ARROW);
         button = TitanTelePads.tools.getItemStackTool().changeName(button, "Scroll Up");
-        nbtTagCompound = TitanTelePads.tools.getNBTTool().getNBTTag(button);
-        nbtTagCompound.a("buttonaction", "right");
-        button = TitanTelePads.tools.getNBTTool().setNBTTag(button, nbtTagCompound);
+        button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "right");
         myGui.setItem(size - 1, button.clone());
     }
 
@@ -81,10 +77,8 @@ public class TelepadGui {
                 button = new ItemStack(Material.ENCHANTED_BOOK);
             }
             button = TitanTelePads.tools.getItemStackTool().changeName(button, catName);
-            nbtTagCompound = TitanTelePads.tools.getNBTTool().getNBTTag(button);
-            nbtTagCompound.a("buttonaction", "switch");
-            nbtTagCompound.a("category", catName);
-            button = TitanTelePads.tools.getNBTTool().setNBTTag(button, nbtTagCompound);
+            button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "switch");
+            button = TitanTelePads.tools.getNBTTool().set(button, "category", catName);
             myGui.setItem(start + slot, button.clone());
         }
     }
@@ -114,9 +108,7 @@ public class TelepadGui {
                     lore.add(ChatColor.GRAY + "Right for settings");
                 }
                 button = TitanTelePads.tools.getItemStackTool().addLore(button, lore);
-                NBTTagCompound nbtTagCompound = TitanTelePads.tools.getNBTTool().getNBTTag(button);
-                nbtTagCompound.a("padlocation", TitanTelePads.tools.getSerializeTool().serializeLocation(l));
-                button = TitanTelePads.tools.getNBTTool().setNBTTag(button, nbtTagCompound);
+                button = TitanTelePads.tools.getNBTTool().set(button, "padlocation", l);
             }
             myGui.setItem(i, button.clone());
         }
