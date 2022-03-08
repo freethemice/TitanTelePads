@@ -297,29 +297,14 @@ public class MainListener  implements Listener {
     }
 
     private void checkTelePadandFix(Location location, int teleportDelay, PressureManager pressureManager) {
+        if (!TelePadsManager.instants.isUpdated(location)) TelePadsManager.instants.setUpdated(location);
         new BukkitRunnable() {
             @Override
             public void run() {
                 location.getBlock().setType(configManager.getMaterial());
-                tools.getFloatingTextTool().deleteFloatingText(location.clone().add(0.5f, 0, 0.5f));
-                if (!configManager.isEnableVanillaOnly()) {
-                    reDrawTelePad();
-                }
-                tools.getFloatingTextTool().changeFloatingText(location.clone().add(0.5f, 2, 0.5f), TelePadsManager.instants.getName(location.clone()));
+                TelePadsManager.instants.getHologramName(location);
+                TelePadsManager.instants.getHologramBlock(location);
                 pressureManager.setTeleporting(false);
-            }
-
-            private void reDrawTelePad() {
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        ItemStack telepads = new ItemStack(configManager.getMaterial());
-                        ItemMeta itemMeta = telepads.getItemMeta();
-                        itemMeta.setCustomModelData(70001);
-                        telepads.setItemMeta(itemMeta);
-                        mainListener.spawnTelePadStand(location.getBlock(), telepads, TelePadsManager.instants.getName(location));
-                    }
-                }.runTaskLater(instants, 1);
             }
         }.runTaskLater(instants, (teleportDelay + 1)* 20L);
     }
@@ -370,7 +355,7 @@ public class MainListener  implements Listener {
         return false;
     }
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-    public void  onPlayerInteractEvent(ProjectileLaunchEvent event)
+    public void  onProjectileLaunchEvent(ProjectileLaunchEvent event)
     {
         if (event.getEntity().getShooter() instanceof Player)
         {
@@ -391,7 +376,7 @@ public class MainListener  implements Listener {
         Location location = event.getClickedBlock().getLocation();
         if (TelePadsManager.instants.isTelePad(location))
         {
-            if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            if (event.getAction() == Action.RIGHT_CLICK_BLOCK && !event.getPlayer().isSneaking()) {
                 event.setCancelled(true);
                 new PressureManager(location, System.currentTimeMillis(), player);
                 TelepadGui telepadGui = new TelepadGui();
@@ -445,16 +430,13 @@ public class MainListener  implements Listener {
                 ItemStack itemStack = tools.getSerializeTool().deserializeItemStackSimple(icon);
                 TelePadsManager.instants.setIcon(block.getLocation(), itemStack.clone());
             }
-            if (!configManager.isEnableVanillaOnly()) {
-                spawnTelePadStand(block, itemInHand, name);
-            }
         }
 
 
 
     }
 
-    public void spawnTelePadStand(Block block, ItemStack itemInHand, String name) {
+ /*   public void spawnTelePadStand(Block block, ItemStack itemInHand, String name) {
         Location location = block.getLocation().add(0.5f, 0, 0.5f);
         ArmorStand stand = block.getWorld().spawn(location, ArmorStand.class);
         stand.setCustomName(ChatColor.translateAlternateColorCodes('&', name));
@@ -465,5 +447,5 @@ public class MainListener  implements Listener {
         stand.setGravity(false);
         stand.setVisible(false);
         stand.getEquipment().setHelmet(itemInHand.clone());
-    }
+    }*/
 }

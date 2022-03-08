@@ -100,7 +100,7 @@ public class TelepadGui {
                 List<String> lore = new ArrayList<String>();
                 lore.add("World: " + ChatColor.WHITE + l.getWorld().getName());
                 if (admin)
-                    lore.add("Owner: " + ChatColor.DARK_RED + "ADMIN");
+                    lore.add("Owner: " + ChatColor.WHITE + "ADMIN");
                 else
                     lore.add("Owner: " + ChatColor.WHITE + TelePadsManager.instants.getOwnerName(l));
                 if (owner.equals(viewer.getUniqueId()) || TitanTelePads.isAdmin(viewer))

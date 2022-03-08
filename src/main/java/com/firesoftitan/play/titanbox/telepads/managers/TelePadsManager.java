@@ -1,13 +1,16 @@
 package com.firesoftitan.play.titanbox.telepads.managers;
 
+import com.firesoftitan.play.titanbox.libs.managers.HologramManager;
 import com.firesoftitan.play.titanbox.libs.managers.SaveManager;
 import com.firesoftitan.play.titanbox.telepads.TitanTelePads;
+import com.firesoftitan.play.titanbox.telepads.enums.TitanItemTypesEnum;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -53,6 +56,56 @@ public class TelePadsManager {
         if (name == null || name.length() < 1) return "Admin";
         return name;
     }
+    public HologramManager getHologramBlock(Location location)
+    {
+        String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
+        if (!configFile.contains("telepads." + key + ".hologram.block")) return setUpHologramBlock(location);
+        HologramManager hologramManager = tools.getHologramTool().getHologram(configFile.getUUID("telepads." + key + ".hologram.block"));
+        if (hologramManager == null) return setUpHologramBlock(location);
+        return hologramManager;
+    }
+    private HologramManager setUpHologramBlock(Location location)
+    {
+        ItemStack telepads = new ItemStack(Material.WHITE_CARPET);
+        ItemMeta itemMeta = telepads.getItemMeta();
+        itemMeta.setCustomModelData(TitanItemTypesEnum.TELEPAD.getDataID());
+        telepads.setItemMeta(itemMeta);
+
+        HologramManager hologramManager = tools.getHologramTool().addHologram(location.clone().add(0.5f ,0,0.5f));
+        hologramManager.setEquipment(EquipmentSlot.HEAD, telepads.clone());
+        String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
+        configFile.set("telepads." + key + ".hologram.block", hologramManager.getUUID());
+        return hologramManager;
+    }
+    public HologramManager getHologramName(Location location)
+    {
+        String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
+        if (!configFile.contains("telepads." + key + ".hologram.name")) return setUpHologramName(location);
+        HologramManager hologramManager = tools.getHologramTool().getHologram(configFile.getUUID("telepads." + key + ".hologram.name"));
+        if (hologramManager == null) return setUpHologramName(location);
+        return hologramManager;
+    }
+    private HologramManager setUpHologramName(Location location)
+    {
+        HologramManager hologramManager = tools.getHologramTool().addHologram(location.clone().add(0.5f ,2,0.5f));
+        hologramManager.setText(this.getName(location));
+        String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
+        configFile.set("telepads." + key + ".hologram.name", hologramManager.getUUID());
+        return hologramManager;
+    }
+    public boolean isUpdated(Location location)
+    {
+        String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
+        if (!configFile.contains("telepads." + key + ".updated")) return false;
+        return true;
+    }
+    public void setUpdated(Location location)
+    {
+        String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
+        configFile.set("telepads." + key + ".updated", TitanTelePads.instants.getDescription().getVersion());
+        TitanTelePads.tools.getHologramTool().deleteOldFloatingText(location.clone().add(0.5f, 2, 0.5f));
+        TitanTelePads.tools.getHologramTool().deleteOldFloatingText(location.clone().add(0.5f, 0, 0.5f));
+    }
     public UUID getOwner(Location location)
     {
         String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
@@ -63,7 +116,7 @@ public class TelePadsManager {
     {
         String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
         configFile.set("telepads." + key + ".name", name);
-        TitanTelePads.tools.getFloatingTextTool().changeFloatingText(location.clone().add(0.5f, 2, 0.5f),  name);
+
     }
     public ItemStack getIcon(Location location)
     {
@@ -144,8 +197,8 @@ public class TelePadsManager {
     public void removeTelePad(Location location)
     {
         String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
-        TitanTelePads.tools.getFloatingTextTool().deleteFloatingText(location.clone().add(0.5f, 2, 0.5f));
-        TitanTelePads.tools.getFloatingTextTool().deleteFloatingText(location.clone().add(0.5f, 0, 0.5f));
+        getHologramName(location).delete();
+        getHologramBlock(location).delete();
         configFile.delete("telepads." + key);
         for(int i = 0; i < output.size(); i++)
         {
@@ -177,8 +230,10 @@ public class TelePadsManager {
         configFile.set("telepads." + key + ".name", name);
         configFile.set("telepads." + key + ".private", privacy);
         configFile.set("telepads." + key + ".admin", admin);
+        configFile.set("telepads." + key + ".updated", TitanTelePads.instants.getDescription().getVersion());
         configFile.set("telepads." + key + ".category", TitanTelePads.configManager.getCategoryDefault());
-
+        setUpHologramName(location);
+        setUpHologramBlock(location);
         try {
             if (!admin) {
                 String playersTexture = TitanTelePads.tools.getPlayerTool().getPlayersTexture(owner);
@@ -193,7 +248,6 @@ public class TelePadsManager {
 
         }
         output.add(location.clone());
-        TitanTelePads.tools.getFloatingTextTool().setFloatingText(location.add(0.5f, 2, 0.5f), name);
     }
     public List<Location> getAll(String category)
     {
