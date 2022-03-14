@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,20 +42,20 @@ public class TelepadGui {
 
     private void mainDraw() {
         drawMain();
-        ItemStack button = new ItemStack(Material.RED_STAINED_GLASS_PANE);
+        ItemStack button = getCustomItem(71009);
         for (int i = size - 9; i < size; i++) {
             myGui.setItem(i, button.clone());
         }
-        button = new ItemStack(Material.ARROW);
-        button = TitanTelePads.tools.getItemStackTool().changeName(button, "Scroll Down");
+        button = getCustomItem(71013);
+        button = TitanTelePads.tools.getItemStackTool().changeName(button, "Scroll Up");
         button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "left");
         myGui.setItem(size - 9, button.clone());
 
         redrawBookButton();
 
 
-        button = new ItemStack(Material.ARROW);
-        button = TitanTelePads.tools.getItemStackTool().changeName(button, "Scroll Up");
+        button = getCustomItem(71012);
+        button = TitanTelePads.tools.getItemStackTool().changeName(button, "Scroll Down");
         button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "right");
         myGui.setItem(size - 1, button.clone());
     }
@@ -65,16 +66,38 @@ public class TelepadGui {
         NBTTagCompound nbtTagCompound;
         List<String> allCats = TitanTelePads.configManager.getCategoryNames();
         for (int i = 0; i < Math.min(allCats.size(), 7); i++) {
-            button = new ItemStack(Material.BOOK);
+
             String catName = allCats.get(i);
             int slot = TitanTelePads.configManager.getCategorySlot(catName);
-            if (catName.equalsIgnoreCase("admin") || catName.equalsIgnoreCase("mine") || catName.equalsIgnoreCase("all"))
-            {
-                button = new ItemStack(Material.WRITABLE_BOOK);
-            }
+
+            button = getCustomItem(71023);
             if (catName.equals(showingCat))
             {
-                button = new ItemStack(Material.ENCHANTED_BOOK);
+                button = getCustomItem(71024);
+            }
+            if (catName.equalsIgnoreCase("admin"))
+            {
+                button = getCustomItem(71017);
+                if (catName.equals(showingCat))
+                {
+                    button = getCustomItem(71018);
+                }
+            }
+            if (catName.equalsIgnoreCase("mine"))
+            {
+                button = getCustomItem(71021);
+                if (catName.equals(showingCat))
+                {
+                    button = getCustomItem(71022);
+                }
+            }
+            if (catName.equalsIgnoreCase("all"))
+            {
+                button = getCustomItem(71019);
+                if (catName.equals(showingCat))
+                {
+                    button = getCustomItem(71020);
+                }
             }
             button = TitanTelePads.tools.getItemStackTool().changeName(button, catName);
             button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "switch");
@@ -82,12 +105,20 @@ public class TelepadGui {
             myGui.setItem(start + slot, button.clone());
         }
     }
-
+    private ItemStack getCustomItem(int id) {
+        ItemStack button = new ItemStack(Material.COARSE_DIRT);
+        button = TitanTelePads.tools.getItemStackTool().changeName(button, " ");
+        ItemMeta itemMeta;
+        itemMeta = button.getItemMeta();
+        itemMeta.setCustomModelData(id);
+        button.setItemMeta(itemMeta);
+        return button.clone();
+    }
     public void drawMain() {
         ItemStack telepads = new ItemStack(TitanTelePads.configManager.getMaterial());
 
         for (int i = 0; i < size - 9; i++) {
-            ItemStack button = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
+            ItemStack button = getCustomItem(71025);
             if (i + scrollStart < locations.size() ) {
                 Location l = locations.get(i + scrollStart);
                 Boolean admin = TelePadsManager.instants.isAdmin(l);

@@ -7,6 +7,7 @@ import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public class TelepadSettingsGui {
     private void mainDraw() {
 
         NBTTagCompound nbtTagCompound;
-        ItemStack button = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
+        ItemStack button = getCustomItem(71009);
         for (int i = 0; i < size; i++) {
             myGui.setItem(i, button.clone());
         }
@@ -47,36 +48,44 @@ public class TelepadSettingsGui {
 
 
     }
-
+    private ItemStack getCustomItem(int id) {
+        ItemStack button = new ItemStack(Material.COARSE_DIRT);
+        button = TitanTelePads.tools.getItemStackTool().changeName(button, " ");
+        ItemMeta itemMeta;
+        itemMeta = button.getItemMeta();
+        itemMeta.setCustomModelData(id);
+        button.setItemMeta(itemMeta);
+        return button.clone();
+    }
     public void reDrawSettings() {
         NBTTagCompound nbtTagCompound;
         ItemStack button;
         int slot = 0;
 
-        button = new ItemStack(Material.NAME_TAG);
+        button = getCustomItem(71016);
         button = TitanTelePads.tools.getItemStackTool().changeName(button, "Name: " + ChatColor.WHITE + padsManager.getName(locations));
         button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "name");
         myGui.setItem(slot, button.clone());
         slot++;
 
-        button = new ItemStack(Material.PLAYER_HEAD);
+        button = getCustomItem(71021);
         button = TitanTelePads.tools.getItemStackTool().changeName(button, "Owner: " + ChatColor.WHITE + TelePadsManager.instants.getOwnerName(locations));
         if (padsManager.isAdmin(locations)) {
-            button = new ItemStack(Material.BOOKSHELF);
+            button = getCustomItem(71017);
             button = TitanTelePads.tools.getItemStackTool().changeName(button, "Owner: " + ChatColor.DARK_RED + "ADMIN");
         }
         button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "owner");
         myGui.setItem(slot, button.clone());
         slot++;
 
-        button = new ItemStack(Material.LIME_CONCRETE);
-        if (padsManager.isPrivate(locations)) button = new ItemStack(Material.RED_CONCRETE);
+        button = getCustomItem(71011);
+        if (padsManager.isPrivate(locations)) button = getCustomItem(71010);
         button = TitanTelePads.tools.getItemStackTool().changeName(button, "Private: " + ChatColor.WHITE + padsManager.isPrivate(locations));
         button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "private");
         myGui.setItem(slot, button.clone());
         slot++;
 
-        button = new ItemStack(Material.LECTERN);
+        button = getCustomItem(71023);
         button = TitanTelePads.tools.getItemStackTool().changeName(button, "Category: " + ChatColor.WHITE + padsManager.getCategory(locations));
         button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "category");
         myGui.setItem(slot, button.clone());
@@ -88,7 +97,7 @@ public class TelepadSettingsGui {
         myGui.setItem(slot, button.clone());
         slot++;
 
-        button = new ItemStack(Material.ARROW);
+        button = getCustomItem(71015);
         button = TitanTelePads.tools.getItemStackTool().changeName(button, "Back");
         button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "Back");
         myGui.setItem(slot, button.clone());
