@@ -12,8 +12,6 @@ import java.util.List;
 
 public class ConfigManager {
     private SaveManager configFile;
-
-    private Material material;
     private int savetime;
     private int teleportdelay;
     private HashMap<String, String> categories;
@@ -22,20 +20,19 @@ public class ConfigManager {
     private String categoryDefaultOpen;
     private String resourcePackURL;
     private boolean resourcePackEnabled;
-    private boolean enableVanillaOnly;
     public ConfigManager() {
         reload();
     }
     public void reload()
     {
         configFile = new SaveManager(TitanTelePads.instants.getName(), "config");
-        if (!configFile.contains("settings.material"))
+        if (configFile.contains("settings.material"))
         {
-            configFile.set("settings.material", "SMOKER");
+            configFile.delete("settings.material");
         }
-        if (!configFile.contains("settings.enable_old_vanilla_only_version"))
+        if (configFile.contains("settings.enable_old_vanilla_only_version"))
         {
-            configFile.set("settings.enable_old_vanilla_only_version", false);
+            configFile.delete("settings.enable_old_vanilla_only_version");
         }
         if (!configFile.contains("settings.savetimer"))
         {
@@ -43,7 +40,7 @@ public class ConfigManager {
         }
         if (!configFile.contains("settings.teleportdelay"))
         {
-            configFile.set("settings.enableVanillaOnly", 1);
+            configFile.set("settings.teleportdelay", 1);
         }
 
         if (!configFile.contains("settings.resourcepack.url") ||
@@ -93,16 +90,9 @@ public class ConfigManager {
         }
         this.resourcePackURL = configFile.getString("settings.resourcepack.url");
         this.resourcePackEnabled = configFile.getBoolean("settings.resourcepack.enabled");
-        this.enableVanillaOnly = configFile.getBoolean("settings.enable_old_vanilla_only_version");
 
         this.teleportdelay = configFile.getInt("settings.teleportdelay");
         this.savetime = configFile.getInt("settings.savetimer");
-        try {
-            this.material = Material.getMaterial(configFile.getString("settings.material").toUpperCase());
-        } catch (Exception e) {
-            TitanTelePads.messageTool.sendMessageSystem(configFile.getString("settings.material") + " can't find that material.");
-            this.material = Material.END_PORTAL_FRAME;
-        }
 
 
         configFile.save();
@@ -121,10 +111,6 @@ public class ConfigManager {
             }
         }
         return permissionCats;
-    }
-
-    public boolean isEnableVanillaOnly() {
-        return enableVanillaOnly;
     }
 
     public String getResourcePackURL() {
@@ -162,8 +148,7 @@ public class ConfigManager {
         return categoryDefault;
     }
     public Material getMaterial() {
-        if (!enableVanillaOnly) return Material.WHITE_CARPET;
-        return this.material;
+        return Material.WHITE_CARPET;
     }
 
     public int getSaveTime() {

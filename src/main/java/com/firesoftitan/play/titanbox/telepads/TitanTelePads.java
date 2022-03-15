@@ -125,11 +125,10 @@ public class TitanTelePads extends JavaPlugin {
         telepads = tools.getItemStackTool().changeName(telepads, ChatColor.AQUA + ItemType.getName());
         telepads = tools.getItemStackTool().addLore(true, telepads, ItemType.getLore());
 
-        if (!configManager.isEnableVanillaOnly()) {
-            ItemMeta itemMeta = telepads.getItemMeta();
-            itemMeta.setCustomModelData(ItemType.getDataID());
-            telepads.setItemMeta(itemMeta);
-        }
+        ItemMeta itemMeta = telepads.getItemMeta();
+        itemMeta.setCustomModelData(ItemType.getDataID());
+        telepads.setItemMeta(itemMeta);
+
         return telepads.clone();
     }
     @NotNull
@@ -160,11 +159,11 @@ public class TitanTelePads extends JavaPlugin {
         if (category != null && category.length() > 1) lores.add("Category: " +  ChatColor.WHITE + category);
 
         telepads = tools.getItemStackTool().addLore(true, telepads, lores);
-        if (!configManager.isEnableVanillaOnly()) {
-            ItemMeta itemMeta = telepads.getItemMeta();
-            itemMeta.setCustomModelData(TitanItemTypesEnum.TELEPAD.getDataID());
-            telepads.setItemMeta(itemMeta);
-        }
+
+        ItemMeta itemMeta = telepads.getItemMeta();
+        itemMeta.setCustomModelData(TitanItemTypesEnum.TELEPAD.getDataID());
+        telepads.setItemMeta(itemMeta);
+
         return telepads.clone();
     }
 

@@ -241,7 +241,12 @@ public class TelePadsManager {
         setUpHologramBlock(location);
         try {
             if (!admin) {
-                String playersTexture = TitanTelePads.tools.getPlayerTool().getPlayersTexture(owner);
+                String playersTexture;
+                if (TitanTelePads.tools.getPlayerTool().doesPlayersHaveTexture(getOwner(location)))
+                    playersTexture = TitanTelePads.tools.getPlayerTool().getPlayersTexture(getOwner(location));
+                else
+                    playersTexture = TitanTelePads.tools.getPlayerTool().getPlayersTexture(UUID.fromString("069a79f4-44e9-4726-a5be-fca90e38aaf5"));
+
                 ItemStack skull = TitanTelePads.tools.getSkullTool().getSkull(playersTexture);
                 configFile.set("telepads." + key + ".icon", skull);
             }
