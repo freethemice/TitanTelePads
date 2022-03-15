@@ -47,9 +47,10 @@ public class ConfigManager {
         }
 
         if (!configFile.contains("settings.resourcepack.url") ||
-                configFile.getString("settings.resourcepack.url").equals("http://play.firesoftitan.com/global/022022/TitanBox.zip"))
+                configFile.getString("settings.resourcepack.url").equals("http://play.firesoftitan.com/global/022022/TitanBox.zip") ||
+                configFile.getString("settings.resourcepack.url").equals("http://play.firesoftitan.com/global/030122/TitanBox.zip"))
         {
-            configFile.set("settings.resourcepack.url", "http://play.firesoftitan.com/global/030122/TitanBox.zip");
+            configFile.set("settings.resourcepack.url", "http://play.firesoftitan.com/global/031522/TitanBox.zip");
         }
         if (!configFile.contains("settings.resourcepack.enabled"))
         {
