@@ -4,15 +4,20 @@ import com.firesoftitan.play.titanbox.libs.tools.LibsMessageTool;
 import com.firesoftitan.play.titanbox.libs.tools.Tools;
 import com.firesoftitan.play.titanbox.telepads.enums.TitanItemTypesEnum;
 import com.firesoftitan.play.titanbox.telepads.listeners.MainListener;
+import com.firesoftitan.play.titanbox.telepads.listeners.PluginListener;
+import com.firesoftitan.play.titanbox.telepads.managers.ChatMessageManager;
 import com.firesoftitan.play.titanbox.telepads.managers.ConfigManager;
 import com.firesoftitan.play.titanbox.telepads.managers.RecipeManager;
 import com.firesoftitan.play.titanbox.telepads.managers.TelePadsManager;
 import com.firesoftitan.play.titanbox.telepads.runnables.SaveRunnable;
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import net.minecraft.nbt.NBTTagCompound;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -31,12 +36,21 @@ public class TitanTelePads extends JavaPlugin {
     public static TitanTelePads instants;
     public static MainListener mainListener;
     public static LibsMessageTool messageTool;
+    public static ChatMessageManager chatMessageManager;
+    public static PluginListener pluginListener;
     public void onEnable() {
         instants = this;
         tools = new Tools(this, new SaveRunnable(), 99835);
         messageTool = tools.getMessageTool();
+        chatMessageManager = new ChatMessageManager();
         mainListener = new MainListener();
         mainListener.registerEvents();
+        if (isBungee())
+        {
+            pluginListener = new PluginListener();
+            pluginListener.registerEvents("titanbox:1");
+            messageTool.sendMessageSystem("Bungee cord server enabled.");
+        }
         configManager = new ConfigManager();
         recipeManager = new RecipeManager();
         new BukkitRunnable() {
@@ -50,6 +64,21 @@ public class TitanTelePads extends JavaPlugin {
         int idx = myList.indexOf(uid);
         if (idx < 0 || idx+1 == myList.size()) return myList.get(0);
         return myList.get(idx + 1);
+    }
+    public boolean isBungee()
+    {
+        ConfigurationSection settings = getServer().spigot().getConfig();
+        boolean bungeecord = settings.getBoolean("settings.bungeecord");
+        return bungeecord;
+    }
+    public void togglePlayerChat(Player player, boolean canChat) {
+        if (isBungee()) {
+            ByteArrayDataOutput out = ByteStreams.newDataOutput();
+            out.writeUTF("chat:toggle"); // the channel could be whatever you want
+            out.writeUTF(player.getUniqueId().toString()); // this data could be whatever you want
+            out.writeUTF(canChat + "");
+            getServer().sendPluginMessage(this, "titanbox:1", out.toByteArray());
+        }
     }
     public void onDisable()
     {

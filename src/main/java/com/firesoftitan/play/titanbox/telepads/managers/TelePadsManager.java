@@ -116,6 +116,13 @@ public class TelePadsManager {
     {
         String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
         configFile.set("telepads." + key + ".name", name);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                HologramManager hologramManager = TelePadsManager.instants.getHologramName(location);
+                hologramManager.setText(name);
+            }
+        }.runTaskLater(TitanTelePads.instants, 1);
 
     }
     public ItemStack getIcon(Location location)

@@ -37,8 +37,6 @@ import static com.firesoftitan.play.titanbox.telepads.TitanTelePads.*;
 
 public class MainListener  implements Listener {
 
-    private  HashMap<UUID, Location> changeNames = new HashMap<UUID, Location>();
-    private  HashMap<UUID, Location> changeIcons = new HashMap<UUID, Location>();
     public MainListener(){
 
     }
@@ -103,60 +101,14 @@ public class MainListener  implements Listener {
     public void onAsyncPlayerChatEvent(AsyncPlayerChatEvent event)
     {
         Player player = event.getPlayer();
-        if (changeIcons.containsKey(player.getUniqueId()))
+        if (!TitanTelePads.instants.isBungee())
         {
-            event.setCancelled(true);
-            Location location = changeIcons.get(player.getUniqueId());
-            changeIcons.remove(player.getUniqueId());
-            if (!event.getMessage().equalsIgnoreCase("cancel"))
+            if (TitanTelePads.chatMessageManager.hasPlayer(player))
             {
-                UUID owner = TelePadsManager.instants.getOwner(location);
-                if (owner.equals(player.getUniqueId()) || isAdmin(player)) {
-                    if (event.getMessage().equalsIgnoreCase("hand"))
-                    {
-                        TelePadsManager.instants.setIcon(location, player.getInventory().getItemInMainHand().clone());
-                    }
-                    else
-                    {
-                        ItemStack skull = tools.getSkullTool().getSkull(event.getMessage());
-                        TelePadsManager.instants.setIcon(location, skull);
-                    }
-                    messageTool.sendMessagePlayer(player, "Icon changed!");
-                    TelepadSettingsGui settingsGui = TelepadSettingsGui.getGui(player);
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            settingsGui.showGUI(player, settingsGui.getLocations());
-                        }
-                    }.runTaskLater(instants, 1);
-                    return;
-                }
+                event.setCancelled(true);
+                TitanTelePads.chatMessageManager.chatInput(player, event.getMessage());
+                return;
             }
-            messageTool.sendMessagePlayer(player, "Icon changed CANCELED!");
-        }
-        if (changeNames.containsKey(player.getUniqueId()))
-        {
-            event.setCancelled(true);
-            Location location = changeNames.get(player.getUniqueId());
-            changeNames.remove(player.getUniqueId());
-            if (!event.getMessage().equalsIgnoreCase("cancel"))
-            {
-                UUID owner = TelePadsManager.instants.getOwner(location);
-                if (owner.equals(player.getUniqueId()) || isAdmin(player)) {
-                    TelePadsManager.instants.setName(location, ChatColor.translateAlternateColorCodes('&', event.getMessage()));
-                    messageTool.sendMessagePlayer(player, "Name changed!");
-                    TelepadSettingsGui settingsGui = TelepadSettingsGui.getGui(player);
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            settingsGui.showGUI(player, settingsGui.getLocations());
-                        }
-                    }.runTaskLater(instants, 1);
-
-                    return;
-                }
-            }
-            messageTool.sendMessagePlayer(player, "Name changed CANCELED!");
         }
     }
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
@@ -207,7 +159,8 @@ public class MainListener  implements Listener {
                                         break;
                                     case "icon":
                                         if (isAdmin(whoClicked) || isOwner) {
-                                            changeIcons.put(whoClicked.getUniqueId(), locations);
+                                            instants.togglePlayerChat((Player) whoClicked, false);
+                                            chatMessageManager.addToIcon(whoClicked.getUniqueId(), locations);
                                             messageTool.sendMessagePlayer((Player) whoClicked, ChatColor.GREEN + "Type Hand in chat for item in your main hand, or paste texture code for head, or cancel to cancel");
                                             whoClicked.closeInventory();
                                         }
@@ -221,7 +174,8 @@ public class MainListener  implements Listener {
                                         break;
                                     case "name":
                                         if (isAdmin(whoClicked) || isOwner) {
-                                            changeNames.put(whoClicked.getUniqueId(), locations);
+                                            instants.togglePlayerChat((Player) whoClicked, false);
+                                            chatMessageManager.addToNames(whoClicked.getUniqueId(), locations);
                                             messageTool.sendMessagePlayer((Player) whoClicked, ChatColor.GREEN + "Type Name in chat, or cancel to cancel");
                                             whoClicked.closeInventory();
                                         }
