@@ -123,7 +123,6 @@ public class MainListener  implements Listener {
         TelepadGuiClicked(event, whoClicked, openInventory, clickedInventory);
         TelepadSettingsGuiClicked(event, whoClicked, openInventory, clickedInventory);
 
-
     }
     private void TelepadSettingsGuiClicked(InventoryClickEvent event, HumanEntity whoClicked, InventoryView openInventory, Inventory clickedInventory) {
         if (openInventory.getTitle().equals(TelepadSettingsGui.guiName)) {
