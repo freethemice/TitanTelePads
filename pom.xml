@@ -6,7 +6,7 @@
 
     <groupId>com.firesoftitan.play.titanbox.telepads</groupId>
     <artifactId>TitanTelePads</artifactId>
-    <version>1.5.7</version>
+    <version>1.5.8</version>
     <packaging>jar</packaging>
 
     <name>TitanTelePads</name>

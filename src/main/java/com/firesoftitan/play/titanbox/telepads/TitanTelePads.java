@@ -5,6 +5,7 @@ import com.firesoftitan.play.titanbox.libs.tools.Tools;
 import com.firesoftitan.play.titanbox.telepads.enums.TitanItemTypesEnum;
 import com.firesoftitan.play.titanbox.telepads.listeners.MainListener;
 import com.firesoftitan.play.titanbox.telepads.listeners.PluginListener;
+import com.firesoftitan.play.titanbox.telepads.listeners.TabCompleteListener;
 import com.firesoftitan.play.titanbox.telepads.managers.ChatMessageManager;
 import com.firesoftitan.play.titanbox.telepads.managers.ConfigManager;
 import com.firesoftitan.play.titanbox.telepads.managers.RecipeManager;
@@ -59,6 +60,9 @@ public class TitanTelePads extends JavaPlugin {
                 new TelePadsManager();
             }
         }.runTaskLater(this, 2);
+        this.getCommand("telepads").setTabCompleter(new TabCompleteListener());
+        this.getCommand("telepad").setTabCompleter(new TabCompleteListener());
+        this.getCommand("tep").setTabCompleter(new TabCompleteListener());
     }
     public static String getNext(List<String> myList, String uid) {
         int idx = myList.indexOf(uid);
@@ -121,15 +125,17 @@ public class TitanTelePads extends JavaPlugin {
             if (sender instanceof Player)
             {
                 Player player = (Player) sender;
-                messageTool.sendMessagePlayer(player, "/tep reload - Reloads config files");
-                messageTool.sendMessagePlayer(player, "/tep give <name> - Give player (name) a telepad");
-                messageTool.sendMessagePlayer(player, "/tep give <telepad,wires,wiring_box,teleporter_box> <name> - Give player (name) a telepad ,wires, wiring_box, or teleporter_box");
+                messageTool.sendMessagePlayer(player, ChatColor.GOLD + "----- Admin Commands -----");
+                messageTool.sendMessagePlayer(player, ChatColor.GOLD + "/tep " + ChatColor.WHITE + "reload " + ChatColor.AQUA + "- Reloads config files");
+                messageTool.sendMessagePlayer(player, ChatColor.GOLD + "/tep " + ChatColor.WHITE + "give " + ChatColor.GRAY + "<name> " + ChatColor.AQUA + "- Give player (player) a telepad");
+                messageTool.sendMessagePlayer(player, ChatColor.GOLD + "/tep " + ChatColor.WHITE + "give " + ChatColor.GRAY + "<telepad, wires, wiring_box, teleporter_box> <player> " + ChatColor.AQUA + "- Give player a telepad ,wires, wiring_box, or teleporter_box");
+                messageTool.sendMessagePlayer(player, ChatColor.GOLD + "----- Admin Commands -----");
             }
             else
             {
                 messageTool.sendMessageSystem("/tep reload - Reloads config files");
-                messageTool.sendMessageSystem("/tep give <name> - Give player (name) a telepad");
-                messageTool.sendMessageSystem("/tep give <telepads,wires,wiring_box,teleporter_box> <name> - Give player (name) a telepads ,wires, wiring_box, or teleporter_box");
+                messageTool.sendMessageSystem("/tep give <player> - Give player (name) a telepad");
+                messageTool.sendMessageSystem("/tep give <telepads, wires, wiring_box, teleporter_box> <player> - Give player (name) a telepads ,wires, wiring_box, or teleporter_box");
             }
         }
 
