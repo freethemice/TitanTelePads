@@ -12,7 +12,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -106,12 +105,42 @@ public class TelepadGui {
         }
     }
     private ItemStack getCustomItem(int id) {
-        ItemStack button = new ItemStack(Material.COARSE_DIRT);
+        ItemStack button = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         button = TitanTelePads.tools.getItemStackTool().changeName(button, " ");
-        ItemMeta itemMeta;
-        itemMeta = button.getItemMeta();
-        itemMeta.setCustomModelData(id);
-        button.setItemMeta(itemMeta);
+        if (TitanTelePads.configManager.isGui_enabled()) {
+            ItemMeta itemMeta;
+            itemMeta = button.getItemMeta();
+            itemMeta.setCustomModelData(id);
+            button.setItemMeta(itemMeta);
+        }
+        else
+        {
+            button = new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
+            button = TitanTelePads.tools.getItemStackTool().changeName(button, " ");
+            switch (id)
+            {
+                case 71017:
+                case 71023:
+                case 71021:
+                case 71019:
+                    button = new ItemStack(Material.GREEN_STAINED_GLASS);
+                    button = TitanTelePads.tools.getItemStackTool().changeName(button, " ");
+                    break;
+                case 71018:
+                case 71024:
+                case 71022:
+                case 71020:
+                    button = new ItemStack(Material.GRAY_STAINED_GLASS);
+                    button = TitanTelePads.tools.getItemStackTool().changeName(button, " ");
+                    break;
+                case 71012:
+                case 71013:
+                    button = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
+                    button = TitanTelePads.tools.getItemStackTool().changeName(button, " ");
+                    break;
+            }
+
+        }
         return button.clone();
     }
     public void drawMain() {

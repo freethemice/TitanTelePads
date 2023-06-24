@@ -9,10 +9,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 public class TelepadSettingsGui {
@@ -49,12 +46,14 @@ public class TelepadSettingsGui {
 
     }
     private ItemStack getCustomItem(int id) {
-        ItemStack button = new ItemStack(Material.COARSE_DIRT);
+        ItemStack button = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         button = TitanTelePads.tools.getItemStackTool().changeName(button, " ");
-        ItemMeta itemMeta;
-        itemMeta = button.getItemMeta();
-        itemMeta.setCustomModelData(id);
-        button.setItemMeta(itemMeta);
+        if (TitanTelePads.configManager.isGui_enabled()) {
+            ItemMeta itemMeta;
+            itemMeta = button.getItemMeta();
+            itemMeta.setCustomModelData(id);
+            button.setItemMeta(itemMeta);
+        }
         return button.clone();
     }
     public void reDrawSettings() {

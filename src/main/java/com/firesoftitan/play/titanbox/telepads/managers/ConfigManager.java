@@ -1,7 +1,6 @@
 package com.firesoftitan.play.titanbox.telepads.managers;
 
 import com.firesoftitan.play.titanbox.libs.managers.SaveManager;
-import com.firesoftitan.play.titanbox.libs.tools.Tools;
 import com.firesoftitan.play.titanbox.telepads.TitanTelePads;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -20,6 +19,7 @@ public class ConfigManager {
     private String categoryDefaultOpen;
     private String resourcePackURL;
     private boolean resourcePackEnabled;
+    private boolean gui_enabled;
     public ConfigManager() {
         reload();
     }
@@ -45,9 +45,15 @@ public class ConfigManager {
 
         if (!configFile.contains("settings.resourcepack.url") ||
                 configFile.getString("settings.resourcepack.url").equals("http://play.firesoftitan.com/global/022022/TitanBox.zip") ||
-                configFile.getString("settings.resourcepack.url").equals("http://play.firesoftitan.com/global/030122/TitanBox.zip"))
+                configFile.getString("settings.resourcepack.url").equals("http://play.firesoftitan.com/global/030122/TitanBox.zip") ||
+                configFile.getString("settings.resourcepack.url").equals("http://play.firesoftitan.com/global/031522/TitanBox.zip"))
         {
-            configFile.set("settings.resourcepack.url", "http://play.firesoftitan.com/global/031522/TitanBox.zip");
+
+            configFile.set("settings.resourcepack.url", "http://play.firesoftitan.com/global/122122/TitanTelepads.zip");
+        }
+        if (!configFile.contains("settings.resourcepack.gui_enabled"))
+        {
+            configFile.set("settings.resourcepack.gui_enabled", true);
         }
         if (!configFile.contains("settings.resourcepack.enabled"))
         {
@@ -80,7 +86,6 @@ public class ConfigManager {
             if (categoryDefaultOpen == null || categoryDefaultOpen.length() < 1) categoryDefaultOpen = key;
             if (configFile.getBoolean("settings.category." + key + ".default")) categoryDefault = key;
             if (configFile.getBoolean("settings.category." + key + ".default_open")) categoryDefaultOpen = key;
-
         }
 
         if (categoryDefault == null || categoryDefault.length() < 1 || categoryDefault.equalsIgnoreCase("mine")
@@ -94,7 +99,7 @@ public class ConfigManager {
         this.teleportdelay = configFile.getInt("settings.teleportdelay");
         this.savetime = configFile.getInt("settings.savetimer");
 
-
+        this.gui_enabled = configFile.getBoolean("settings.resourcepack.gui_enabled");
         configFile.save();
 
     }
@@ -111,6 +116,10 @@ public class ConfigManager {
             }
         }
         return permissionCats;
+    }
+
+    public boolean isGui_enabled() {
+        return gui_enabled;
     }
 
     public String getResourcePackURL() {
