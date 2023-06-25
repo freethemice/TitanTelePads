@@ -274,6 +274,10 @@ public class MainListener  implements Listener {
 
         if (TelePadsManager.instants.isTelePad(location) || TelePadsManager.instants.isTelePad(location.clone().add(0, -1, 0))) {
             if (!PressureManager.contains(player)) {
+
+                //TelePadsManager.instants.getHologramName(location);
+                //TelePadsManager.instants.getHologramBlock(location);
+
                 new PressureManager(location,System.currentTimeMillis(), player);
                 TelepadGui telepadGui = new TelepadGui();
                 telepadGui.showGUI(player);

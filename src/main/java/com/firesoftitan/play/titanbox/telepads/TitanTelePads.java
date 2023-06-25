@@ -1,5 +1,6 @@
 package com.firesoftitan.play.titanbox.telepads;
 
+import com.firesoftitan.play.titanbox.libs.managers.HologramManager;
 import com.firesoftitan.play.titanbox.libs.tools.LibsMessageTool;
 import com.firesoftitan.play.titanbox.libs.tools.Tools;
 import com.firesoftitan.play.titanbox.telepads.enums.TitanItemTypesEnum;
@@ -19,6 +20,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -100,6 +103,57 @@ public class TitanTelePads extends JavaPlugin {
                         else messageTool.sendMessageSystem("config reloaded!");
                         return true;
                     }
+                    if (name.equals("remove"))
+                    {
+                        if (!(sender instanceof Player))
+                        {
+                            messageTool.sendMessageSystem("Only players can use this command.");
+                            return true;
+                        }
+                        boolean safety = true;
+                        if (args.length > 2)
+                        {
+                            safety = Boolean.parseBoolean(args[2]);
+                        }
+                        try {
+                            if (safety) {
+                                List<HologramManager> holograms = new ArrayList<HologramManager>();
+                                if (args[1].equalsIgnoreCase("all")) {
+                                    holograms = tools.getHologramTool().getHolograms();
+                                } else {
+                                    int d = Integer.parseInt(args[1]);
+                                    holograms = tools.getHologramTool().getHolograms(((Player) sender).getLocation(), d, d, d);
+                                }
+                                for (HologramManager hologramManager : holograms) {
+                                    hologramManager.delete();
+                                }
+                                messageTool.sendMessagePlayer((Player) sender, holograms.size() + " holograms removed.");
+                            }
+                            else
+                            {
+                                if (args[1].equalsIgnoreCase("all")) {
+                                    messageTool.sendMessagePlayer((Player) sender, "You can't use all on unsafe removal.");
+                                    return true;
+                                }
+
+                                int d = Integer.parseInt(args[1]);
+                                int i = 0;
+                                for (Entity entity: ((Player) sender).getNearbyEntities(d, d, d))
+                                {
+                                    if (entity.getType() == EntityType.ARMOR_STAND)
+                                    {
+                                        entity.remove();
+                                        i++;
+                                    }
+                                }
+                                messageTool.sendMessagePlayer((Player) sender, i + " armor stands removed.");
+                            }
+                        } catch (NumberFormatException e) {
+                            messageTool.sendMessagePlayer((Player) sender, args[1] + " isn't a number");
+                            return true;
+                        }
+                        return true;
+                    }
                     if (name.equals("give"))
                     {
                         if (args.length > 1)
@@ -129,6 +183,8 @@ public class TitanTelePads extends JavaPlugin {
                 messageTool.sendMessagePlayer(player, ChatColor.GOLD + "/tep " + ChatColor.WHITE + "reload " + ChatColor.AQUA + "- Reloads config files");
                 messageTool.sendMessagePlayer(player, ChatColor.GOLD + "/tep " + ChatColor.WHITE + "give " + ChatColor.GRAY + "<name> " + ChatColor.AQUA + "- Give player (player) a telepad");
                 messageTool.sendMessagePlayer(player, ChatColor.GOLD + "/tep " + ChatColor.WHITE + "give " + ChatColor.GRAY + "<telepad, wires, wiring_box, teleporter_box> <player> " + ChatColor.AQUA + "- Give player a telepad ,wires, wiring_box, or teleporter_box");
+                messageTool.sendMessagePlayer(player, ChatColor.GOLD + "/tep " + ChatColor.WHITE + "remove " + ChatColor.GRAY + "<all/distance from player> " + ChatColor.RED + "- removes all holograms.");
+                messageTool.sendMessagePlayer(player, ChatColor.GOLD + "/tep " + ChatColor.WHITE + "remove " + ChatColor.GRAY + "<distance from player> false " + ChatColor.RED + "- removes all armor stands.");
                 messageTool.sendMessagePlayer(player, ChatColor.GOLD + "----- Admin Commands -----");
             }
             else

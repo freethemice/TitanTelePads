@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class TabCompleteListener implements TabCompleter {
-    private static final String[] ADMIN_COMMANDS = {  "reload", "give", "help"};
+    private static final String[] ADMIN_COMMANDS = {  "remove", "reload", "give", "help"};
     private static final String[] NON_ADMIN_COMMANDS = { };
     private List<String> pluginNames = new ArrayList<String>();
     @Nullable
@@ -43,7 +43,17 @@ public class TabCompleteListener implements TabCompleter {
                     Commands.add(player.getName());
                 }
             }
-
+            if (args[0].equalsIgnoreCase("remove"))
+            {
+                Commands.add("all");
+                for(int i = 1; i < 500; i++) {
+                    Commands.add(i + "");
+                }
+                Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
+                for(Player player: onlinePlayers) {
+                    Commands.add(player.getName());
+                }
+            }
         }
         if (args.length == 3) {
             if (args[0].equalsIgnoreCase("give") )

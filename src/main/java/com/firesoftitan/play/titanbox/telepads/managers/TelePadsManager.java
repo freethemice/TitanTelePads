@@ -60,8 +60,13 @@ public class TelePadsManager {
     {
         String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
         if (!configFile.contains("telepads." + key + ".hologram.block")) return setUpHologramBlock(location);
-        HologramManager hologramManager = tools.getHologramTool().getHologram(configFile.getUUID("telepads." + key + ".hologram.block"));
-        if (hologramManager == null) return setUpHologramBlock(location);
+        HologramManager hologramManager = TitanTelePads.tools.getHologramTool().getHologram(configFile.getUUID("telepads." + key + ".hologram.block"));
+        if (hologramManager == null)
+        {
+            List<HologramManager> holograms = tools.getHologramTool().getHolograms(location);
+            if (holograms.size() > 0) hologramManager = holograms.get(0);
+            if (hologramManager == null || hologramManager.getText() != null) hologramManager = setUpHologramBlock(location);
+        }
         return hologramManager;
     }
     private HologramManager setUpHologramBlock(Location location)
@@ -71,7 +76,7 @@ public class TelePadsManager {
         itemMeta.setCustomModelData(TitanItemTypesEnum.TELEPAD.getDataID());
         telepads.setItemMeta(itemMeta);
 
-        HologramManager hologramManager = tools.getHologramTool().addHologram(location.clone().add(0.5f ,0,0.5f));
+        HologramManager hologramManager = TitanTelePads.tools.getHologramTool().addHologram(location.clone().add(0.5f ,0,0.5f));
         hologramManager.setEquipment(EquipmentSlot.HEAD, telepads.clone());
         String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
         configFile.set("telepads." + key + ".hologram.block", hologramManager.getUUID());
@@ -81,13 +86,18 @@ public class TelePadsManager {
     {
         String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
         if (!configFile.contains("telepads." + key + ".hologram.name")) return setUpHologramName(location);
-        HologramManager hologramManager = tools.getHologramTool().getHologram(configFile.getUUID("telepads." + key + ".hologram.name"));
-        if (hologramManager == null) return setUpHologramName(location);
+        HologramManager hologramManager = TitanTelePads.tools.getHologramTool().getHologram(configFile.getUUID("telepads." + key + ".hologram.name"));
+        if (hologramManager == null)
+        {
+            List<HologramManager> holograms = tools.getHologramTool().getHolograms(location.clone().add(0 ,2,0));
+            if (holograms.size() > 0) hologramManager = holograms.get(0);
+            if (hologramManager == null || hologramManager.getText() == null) hologramManager = setUpHologramName(location);
+        }
         return hologramManager;
     }
     private HologramManager setUpHologramName(Location location)
     {
-        HologramManager hologramManager = tools.getHologramTool().addHologram(location.clone().add(0.5f ,2,0.5f));
+        HologramManager hologramManager = TitanTelePads.tools.getHologramTool().addHologram(location.clone().add(0.5f ,2,0.5f));
         hologramManager.setText(this.getName(location));
         String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
         configFile.set("telepads." + key + ".hologram.name", hologramManager.getUUID());
