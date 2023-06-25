@@ -43,6 +43,19 @@ public class TabCompleteListener implements TabCompleter {
                     Commands.add(player.getName());
                 }
             }
+
+            if (args[0].equalsIgnoreCase("remove"))
+            {
+                Commands.add("holograms");
+                Commands.add("armorstand");
+            }
+
+        }
+        if (args.length == 3) {
+            if (args[0].equalsIgnoreCase("give"))
+            {
+                return null;
+            }
             if (args[0].equalsIgnoreCase("remove"))
             {
                 Commands.add("all");
@@ -54,13 +67,6 @@ public class TabCompleteListener implements TabCompleter {
                     Commands.add(player.getName());
                 }
             }
-        }
-        if (args.length == 3) {
-            if (args[0].equalsIgnoreCase("give") )
-            {
-                return null;
-            }
-
         }
         if (args.length == 4) {
 

@@ -1,15 +1,16 @@
 package com.firesoftitan.play.titanbox.telepads.enums;
 
+import com.firesoftitan.play.titanbox.telepads.managers.LangManager;
 import org.bukkit.Material;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public enum TitanItemTypesEnum {
-    TELEPAD(Material.STRING, 70001, "TELEPAD", "Teleport Pad", true, ""),
-    WIRES(Material.STRING, 70002, "WIRES", "Wires", false, ""),
-    WIRING_BOX(Material.NETHERITE_INGOT, 70003, "WIRING_BOX", "Wiring Box",false, ""),
-    TELEPORTER_BOX(Material.ENDER_PEARL, 70004, "TELEPORTER_BOX", "Teleporter Box", false,"");
+    TELEPAD(Material.STRING, 70001, "TELEPAD", LangManager.instants.getMessage("items.telepad.name"), true, ""),
+    WIRES(Material.STRING, 70002, "WIRES", LangManager.instants.getMessage("items.wires.name"), false, LangManager.instants.getMessage("items.wires.lore")),
+    WIRING_BOX(Material.NETHERITE_INGOT, 70003, "WIRING_BOX", LangManager.instants.getMessage("items.wiring_box.name"),false, LangManager.instants.getMessage("items.wiring_box.lore")),
+    TELEPORTER_BOX(Material.ENDER_PEARL, 70004, "TELEPORTER_BOX", LangManager.instants.getMessage("items.teleporter_box.name"), false,LangManager.instants.getMessage("items.teleporter_box.lore"));
 
     private boolean placeable;
     private Material material;

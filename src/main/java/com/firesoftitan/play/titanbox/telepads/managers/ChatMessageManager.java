@@ -88,7 +88,7 @@ public class ChatMessageManager {
                     ItemStack skull = tools.getSkullTool().getSkull(message);
                     TelePadsManager.instants.setIcon(location, skull);
                 }
-                messageTool.sendMessagePlayer(player, "Icon changed!");
+                messageTool.sendMessagePlayer(player, LangManager.instants.getMessage("icon.changed"));
                 TelepadSettingsGui settingsGui = TelepadSettingsGui.getGui(player);
                 new BukkitRunnable() {
                     @Override
@@ -98,7 +98,7 @@ public class ChatMessageManager {
                 }.runTaskLater(instants, 1);
                 return;
             }
-            messageTool.sendMessagePlayer(player, "Icon changed CANCELED!");
+            messageTool.sendMessagePlayer(player, LangManager.instants.getMessage("icon.canceled"));
         }
         if (changeNames.containsKey(player.getUniqueId()))
         {
@@ -107,7 +107,7 @@ public class ChatMessageManager {
             UUID owner = TelePadsManager.instants.getOwner(location);
             if (owner.equals(player.getUniqueId()) || isAdmin(player)) {
                 TelePadsManager.instants.setName(location, ChatColor.translateAlternateColorCodes('&', message));
-                messageTool.sendMessagePlayer(player, "Name changed!");
+                messageTool.sendMessagePlayer(player, LangManager.instants.getMessage("name.changed"));
                 TelepadSettingsGui settingsGui = TelepadSettingsGui.getGui(player);
                 new BukkitRunnable() {
                     @Override
@@ -117,7 +117,7 @@ public class ChatMessageManager {
                 }.runTaskLater(instants, 1);
                 return;
             }
-            messageTool.sendMessagePlayer(player, "Name changed CANCELED!");
+            messageTool.sendMessagePlayer(player, LangManager.instants.getMessage("name.canceled"));
         }
     }
 

@@ -1,6 +1,7 @@
 package com.firesoftitan.play.titanbox.telepads.guis;
 
 import com.firesoftitan.play.titanbox.telepads.TitanTelePads;
+import com.firesoftitan.play.titanbox.telepads.managers.LangManager;
 import com.firesoftitan.play.titanbox.telepads.managers.TelePadsManager;
 import net.minecraft.nbt.NBTTagCompound;
 import org.bukkit.*;
@@ -19,7 +20,7 @@ public class TelepadSettingsGui {
     private Player viewer;
     private Location locations;
     private TelePadsManager padsManager;
-    public static String guiName = "TelePad Settings Gui";
+    public static String guiName = LangManager.instants.getMessage("telepadguisettings.name");
     public static TelepadSettingsGui getGui(Player player)
     {
         if (activeGuis.containsKey(player.getUniqueId())) {
@@ -62,16 +63,16 @@ public class TelepadSettingsGui {
         int slot = 0;
 
         button = getCustomItem(71016);
-        button = TitanTelePads.tools.getItemStackTool().changeName(button, "Name: " + ChatColor.WHITE + padsManager.getName(locations));
+        button = TitanTelePads.tools.getItemStackTool().changeName(button, LangManager.instants.getMessage("telepadguisettings.name2") + ChatColor.WHITE + padsManager.getName(locations));
         button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "name");
         myGui.setItem(slot, button.clone());
         slot++;
 
         button = getCustomItem(71021);
-        button = TitanTelePads.tools.getItemStackTool().changeName(button, "Owner: " + ChatColor.WHITE + TelePadsManager.instants.getOwnerName(locations));
+        button = TitanTelePads.tools.getItemStackTool().changeName(button, LangManager.instants.getMessage("telepadgui.owner") + ChatColor.WHITE + TelePadsManager.instants.getOwnerName(locations));
         if (padsManager.isAdmin(locations)) {
             button = getCustomItem(71017);
-            button = TitanTelePads.tools.getItemStackTool().changeName(button, "Owner: " + ChatColor.DARK_RED + "ADMIN");
+            button = TitanTelePads.tools.getItemStackTool().changeName(button, LangManager.instants.getMessage("telepadgui.owner")  + ChatColor.DARK_RED + "ADMIN");
         }
         button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "owner");
         myGui.setItem(slot, button.clone());
@@ -79,25 +80,25 @@ public class TelepadSettingsGui {
 
         button = getCustomItem(71011);
         if (padsManager.isPrivate(locations)) button = getCustomItem(71010);
-        button = TitanTelePads.tools.getItemStackTool().changeName(button, "Private: " + ChatColor.WHITE + padsManager.isPrivate(locations));
+        button = TitanTelePads.tools.getItemStackTool().changeName(button, LangManager.instants.getMessage("telepadguisettings.private") + ChatColor.WHITE + padsManager.isPrivate(locations));
         button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "private");
         myGui.setItem(slot, button.clone());
         slot++;
 
         button = getCustomItem(71023);
-        button = TitanTelePads.tools.getItemStackTool().changeName(button, "Category: " + ChatColor.WHITE + padsManager.getCategory(locations));
+        button = TitanTelePads.tools.getItemStackTool().changeName(button, LangManager.instants.getMessage("telepadguisettings.category") + ChatColor.WHITE + padsManager.getCategory(locations));
         button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "category");
         myGui.setItem(slot, button.clone());
         slot++;
 
         button = padsManager.getIcon(locations);
-        button = TitanTelePads.tools.getItemStackTool().changeName(button, "Icon");
+        button = TitanTelePads.tools.getItemStackTool().changeName(button, LangManager.instants.getMessage("telepadguisettings.icon"));
         button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "icon");
         myGui.setItem(slot, button.clone());
         slot++;
 
         button = getCustomItem(71015);
-        button = TitanTelePads.tools.getItemStackTool().changeName(button, "Back");
+        button = TitanTelePads.tools.getItemStackTool().changeName(button, LangManager.instants.getMessage("telepadguisettings.back"));
         button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "Back");
         myGui.setItem(slot, button.clone());
         slot++;

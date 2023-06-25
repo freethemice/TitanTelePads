@@ -20,6 +20,7 @@ public class ConfigManager {
     private String resourcePackURL;
     private boolean resourcePackEnabled;
     private boolean gui_enabled;
+    private String language;
     public ConfigManager() {
         reload();
     }
@@ -58,6 +59,10 @@ public class ConfigManager {
         if (!configFile.contains("settings.resourcepack.enabled"))
         {
             configFile.set("settings.resourcepack.enabled", true);
+        }
+        if (!configFile.contains("settings.resourcepack.enabled"))
+        {
+            configFile.set("settings.language", "en_us");
         }
         if (!configFile.contains("settings.resourcePackEnabled"))
         {
@@ -100,9 +105,15 @@ public class ConfigManager {
         this.savetime = configFile.getInt("settings.savetimer");
 
         this.gui_enabled = configFile.getBoolean("settings.resourcepack.gui_enabled");
+        this.language = configFile.getString("settings.language");
         configFile.save();
 
     }
+
+    public String getLanguage() {
+        return language;
+    }
+
     public List<String> getCategoryNames(Player player)
     {
         List<String> categoryNames = getCategoryNames();

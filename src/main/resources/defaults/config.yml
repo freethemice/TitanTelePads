@@ -1,0 +1,26 @@
+settings:
+  language: en_us #this is the language file used in the lang directory
+  savetimer: 600 #In seconds how often it saves
+  teleportdelay: 0 #How long it takes to teleport a player, with countdown
+  category: #You can have up to 7 custom categories with any name
+    All: #All is special and will show all telepads, no permission and no default allowed
+      slot: 0 #where the category show on the lower bar
+    Admin: #Admin is special and will show all Admin telepads, no permission and no default allowed
+      slot: 1
+    Mine: #Mineis special and will show all telepads for that user, no permission and no default allowed
+      slot: 2
+      default_open: true #this category will show first when standing on a pad
+    Events: #can be change to any name
+      permission: titanbox.admin #what permission you need to SET telepads to this category
+      slot: 3
+    Spawns: #can be change to any name
+      permission: titanbox.admin
+      slot: 4
+    Public: #can be change to any name
+      permission: none #none means anyone can set telepad to this category
+      slot: 5
+      default: true #This is the category that telepads are set to when placing
+  resourcepack:
+    url: http://play.firesoftitan.com/global/030122/TitanBox.zip
+    enabled: true #If enabled the plugin will force players to this resoure pack
+    gui_enabled: true #true will use the texture pack, false will use blocks (false, is not recommended)

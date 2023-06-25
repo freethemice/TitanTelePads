@@ -1,6 +1,7 @@
 package com.firesoftitan.play.titanbox.telepads.guis;
 
 import com.firesoftitan.play.titanbox.telepads.TitanTelePads;
+import com.firesoftitan.play.titanbox.telepads.managers.LangManager;
 import com.firesoftitan.play.titanbox.telepads.managers.TelePadsManager;
 import net.minecraft.nbt.NBTTagCompound;
 import org.bukkit.Bukkit;
@@ -25,7 +26,7 @@ public class TelepadGui {
     private int scrollStart = 0;
     private List<Location> locations;
     private String showingCat = "";
-    public static String guiName = "TelePad Gui";
+    public static String guiName = LangManager.instants.getMessage("telepadgui.name");
     public static TelepadGui getGui(Player player)
     {
         if (activeGuis.containsKey(player.getUniqueId())) {
@@ -46,7 +47,7 @@ public class TelepadGui {
             myGui.setItem(i, button.clone());
         }
         button = getCustomItem(71013);
-        button = TitanTelePads.tools.getItemStackTool().changeName(button, "Scroll Up");
+        button = TitanTelePads.tools.getItemStackTool().changeName(button, LangManager.instants.getMessage("telepadgui.scroll_up"));
         button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "left");
         myGui.setItem(size - 9, button.clone());
 
@@ -54,7 +55,7 @@ public class TelepadGui {
 
 
         button = getCustomItem(71012);
-        button = TitanTelePads.tools.getItemStackTool().changeName(button, "Scroll Down");
+        button = TitanTelePads.tools.getItemStackTool().changeName(button, LangManager.instants.getMessage("telepadgui.scroll_down"));
         button = TitanTelePads.tools.getNBTTool().set(button, "buttonaction", "right");
         myGui.setItem(size - 1, button.clone());
     }
@@ -154,18 +155,18 @@ public class TelepadGui {
                 UUID owner = TelePadsManager.instants.getOwner(l);
                 button = TelePadsManager.instants.getIcon(l);
                 if (TitanTelePads.tools.getItemStackTool().isEmpty(button)) button = telepads.clone();
-                button = TitanTelePads.tools.getItemStackTool().changeName(button, ChatColor.GREEN + "(Public) "  + ChatColor.RESET + TelePadsManager.instants.getName(l));
-                if (TelePadsManager.instants.isPrivate(l)) button = TitanTelePads.tools.getItemStackTool().changeName(button, ChatColor.RED + "(Private) "  + ChatColor.RESET + TelePadsManager.instants.getName(l));
+                button = TitanTelePads.tools.getItemStackTool().changeName(button, LangManager.instants.getMessage("telepadgui.public")  + ChatColor.RESET + TelePadsManager.instants.getName(l));
+                if (TelePadsManager.instants.isPrivate(l)) button = TitanTelePads.tools.getItemStackTool().changeName(button, LangManager.instants.getMessage("telepadgui.private")  + ChatColor.RESET + TelePadsManager.instants.getName(l));
 
                 List<String> lore = new ArrayList<String>();
-                lore.add("World: " + ChatColor.WHITE + l.getWorld().getName());
+                lore.add(LangManager.instants.getMessage("telepadgui.world") + ChatColor.WHITE + l.getWorld().getName());
                 if (admin)
-                    lore.add("Owner: " + ChatColor.WHITE + "ADMIN");
+                    lore.add(LangManager.instants.getMessage("telepadgui.owner") + LangManager.instants.getMessage("telepadgui.admin"));
                 else
-                    lore.add("Owner: " + ChatColor.WHITE + TelePadsManager.instants.getOwnerName(l));
+                    lore.add(LangManager.instants.getMessage("telepadgui.owner") + ChatColor.WHITE + TelePadsManager.instants.getOwnerName(l));
                 if (owner.equals(viewer.getUniqueId()) || TitanTelePads.isAdmin(viewer))
                 {
-                    lore.add(ChatColor.GRAY + "Right for settings");
+                    lore.add(ChatColor.GRAY + LangManager.instants.getMessage("telepadgui.right"));
                 }
                 button = TitanTelePads.tools.getItemStackTool().addLore(button, lore);
                 button = TitanTelePads.tools.getNBTTool().set(button, "padlocation", l);

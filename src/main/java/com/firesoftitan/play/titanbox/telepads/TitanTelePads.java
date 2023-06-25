@@ -7,10 +7,7 @@ import com.firesoftitan.play.titanbox.telepads.enums.TitanItemTypesEnum;
 import com.firesoftitan.play.titanbox.telepads.listeners.MainListener;
 import com.firesoftitan.play.titanbox.telepads.listeners.PluginListener;
 import com.firesoftitan.play.titanbox.telepads.listeners.TabCompleteListener;
-import com.firesoftitan.play.titanbox.telepads.managers.ChatMessageManager;
-import com.firesoftitan.play.titanbox.telepads.managers.ConfigManager;
-import com.firesoftitan.play.titanbox.telepads.managers.RecipeManager;
-import com.firesoftitan.play.titanbox.telepads.managers.TelePadsManager;
+import com.firesoftitan.play.titanbox.telepads.managers.*;
 import com.firesoftitan.play.titanbox.telepads.runnables.SaveRunnable;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
@@ -29,6 +26,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,7 +57,10 @@ public class TitanTelePads extends JavaPlugin {
             pluginListener.registerEvents("titanbox:1");
             messageTool.sendMessageSystem("Bungee cord server enabled.");
         }
+        saveDefaultFiles();
+
         configManager = new ConfigManager();
+        new LangManager(configManager.getLanguage());
         recipeManager = new RecipeManager();
         new BukkitRunnable() {
             @Override
@@ -66,6 +71,64 @@ public class TitanTelePads extends JavaPlugin {
         this.getCommand("telepads").setTabCompleter(new TabCompleteListener());
         this.getCommand("telepad").setTabCompleter(new TabCompleteListener());
         this.getCommand("tep").setTabCompleter(new TabCompleteListener());
+
+    }
+
+    private void saveDefaultFiles() {
+        List<String> jarFileList = getJarFiles();
+        for(String s: jarFileList)
+        {
+            System.out.println(s);
+            saveDefaultFile(s);
+        }
+    }
+
+    private void saveDefaultFile(String fileName) {
+        String jarFileName = fileName;
+        fileName = fileName.substring(9);
+        File file = new File(getDataFolder(), fileName);
+
+        if (!file.exists()) {
+            // Create the parent directories if they don't exist
+            file.getParentFile().mkdirs();
+
+            try (InputStream inputStream = getClass().getResourceAsStream( jarFileName)) {
+                if (inputStream != null) {
+                    // Copy the file from the JAR to the plugin folder
+                    if (!file.exists()) Files.copy(inputStream, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                } else {
+                    getLogger().warning(LangManager.instants.getMessage("error.default_file") + fileName);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    private List<String> getJarFiles() {
+        String directoryName = "defaults";
+        List<String> jarFiles = new ArrayList<>();
+
+        try {
+            // Get the JAR file path
+            Path jarPath = Paths.get(getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
+
+            if (jarPath != null && Files.isRegularFile(jarPath)) {
+                // Open the JAR file system
+                try (FileSystem jarFileSystem = FileSystems.newFileSystem(jarPath)) {
+                    // Specify the path of the directory within the JAR
+                    Path directoryPath = jarFileSystem.getPath("/" + directoryName);
+
+                    // Iterate over all files in the specified directory in the JAR
+                    Files.walk(directoryPath)
+                            .filter(Files::isRegularFile)
+                            .forEach(filePath -> jarFiles.add(filePath.toString()));
+                }
+            }
+        } catch (IOException | URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        return jarFiles;
     }
     public static String getNext(List<String> myList, String uid) {
         int idx = myList.indexOf(uid);
@@ -92,106 +155,120 @@ public class TitanTelePads extends JavaPlugin {
         this.saveALL();
     }
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, String label, String[] args) {
-        if (isAdmin(sender)) {
-            if (label.equalsIgnoreCase("telepad") || label.equalsIgnoreCase("telepads") || label.equalsIgnoreCase("tep")) {
-                if (args.length > 0) {
-                    String name = args[0];
-                    if (name.equals("reload"))
-                    {
-                        configManager.reload();
-                        if (sender instanceof Player) messageTool.sendMessagePlayer((Player) sender, "config reloaded!");
-                        else messageTool.sendMessageSystem("config reloaded!");
-                        return true;
-                    }
-                    if (name.equals("remove"))
-                    {
-                        if (!(sender instanceof Player))
+        try {
+            if (isAdmin(sender)) {
+                if (label.equalsIgnoreCase("telepad") || label.equalsIgnoreCase("telepads") || label.equalsIgnoreCase("tep")) {
+                    if (args.length > 0) {
+                        String name = args[0];
+                        if (name.equals("reload"))
                         {
-                            messageTool.sendMessageSystem("Only players can use this command.");
+                            configManager.reload();
+                            if (sender instanceof Player) messageTool.sendMessagePlayer((Player) sender, LangManager.instants.getMessage("reloaded"));
+                            else messageTool.sendMessageSystem(LangManager.instants.getMessage("reloaded"));
                             return true;
                         }
-                        boolean safety = true;
-                        if (args.length > 2)
+                        if (name.equals("remove"))
                         {
-                            safety = Boolean.parseBoolean(args[2]);
-                        }
-                        try {
-                            if (safety) {
-                                List<HologramManager> holograms = new ArrayList<HologramManager>();
-                                if (args[1].equalsIgnoreCase("all")) {
-                                    holograms = tools.getHologramTool().getHolograms();
-                                } else {
-                                    int d = Integer.parseInt(args[1]);
-                                    holograms = tools.getHologramTool().getHolograms(((Player) sender).getLocation(), d, d, d);
-                                }
-                                for (HologramManager hologramManager : holograms) {
-                                    hologramManager.delete();
-                                }
-                                messageTool.sendMessagePlayer((Player) sender, holograms.size() + " holograms removed.");
+                            if (!(sender instanceof Player))
+                            {
+                                messageTool.sendMessageSystem(LangManager.instants.getMessage("error.console"));
+                                return true;
+                            }
+                            boolean safety = true;
+                            if (args[1].equalsIgnoreCase("holograms")) {
+                                safety = true;
+                            }
+                            else if (args[1].equalsIgnoreCase("armorstand")) {
+                                safety = false;
                             }
                             else
                             {
-                                if (args[1].equalsIgnoreCase("all")) {
-                                    messageTool.sendMessagePlayer((Player) sender, "You can't use all on unsafe removal.");
+                                return true;
+                            }
+                                try {
+                                    if (safety) {
+                                        List<HologramManager> holograms = new ArrayList<HologramManager>();
+                                        if (args[2].equalsIgnoreCase("all")) {
+                                            holograms = tools.getHologramTool().getHolograms();
+                                        } else {
+                                            int d = Integer.parseInt(args[2]);
+                                            holograms = tools.getHologramTool().getHolograms(((Player) sender).getLocation(), d, d, d);
+                                        }
+                                        for (HologramManager hologramManager : holograms) {
+                                            hologramManager.delete();
+                                        }
+                                        messageTool.sendMessagePlayer((Player) sender, holograms.size() + LangManager.instants.getMessage("holograms_removed"));
+                                    } else {
+                                        if (args[2].equalsIgnoreCase("all")) {
+                                            messageTool.sendMessagePlayer((Player) sender, LangManager.instants.getMessage("error.unsafe"));
+                                            return true;
+                                        }
+
+                                        int d = Integer.parseInt(args[2]);
+                                        int i = 0;
+                                        for (Entity entity : ((Player) sender).getNearbyEntities(d, d, d)) {
+                                            if (entity.getType() == EntityType.ARMOR_STAND) {
+                                                entity.remove();
+                                                i++;
+                                            }
+                                        }
+                                        messageTool.sendMessagePlayer((Player) sender, i + LangManager.instants.getMessage("armor_stands_removed"));
+                                    }
+                                } catch (NumberFormatException e) {
+                                    messageTool.sendMessagePlayer((Player) sender, args[2] + LangManager.instants.getMessage("error.number"));
                                     return true;
                                 }
 
-                                int d = Integer.parseInt(args[1]);
-                                int i = 0;
-                                for (Entity entity: ((Player) sender).getNearbyEntities(d, d, d))
-                                {
-                                    if (entity.getType() == EntityType.ARMOR_STAND)
-                                    {
-                                        entity.remove();
-                                        i++;
-                                    }
-                                }
-                                messageTool.sendMessagePlayer((Player) sender, i + " armor stands removed.");
-                            }
-                        } catch (NumberFormatException e) {
-                            messageTool.sendMessagePlayer((Player) sender, args[1] + " isn't a number");
                             return true;
                         }
-                        return true;
-                    }
-                    if (name.equals("give"))
-                    {
-                        if (args.length > 1)
+                        if (name.equals("give"))
                         {
-                            if (args.length > 2) {
-                                for (TitanItemTypesEnum typesEnum : TitanItemTypesEnum.values()) {
-                                    if (args[1].toUpperCase().equalsIgnoreCase(typesEnum.getID())) {
-                                        Player player = Bukkit.getPlayer(args[2]);
-                                        ItemStack telepads = getPartItem(typesEnum);
-                                        player.getInventory().addItem(telepads.clone());
-                                        return true;
+                            if (args.length > 1)
+                            {
+                                if (args.length > 2) {
+                                    for (TitanItemTypesEnum typesEnum : TitanItemTypesEnum.values()) {
+                                        if (args[1].toUpperCase().equalsIgnoreCase(typesEnum.getID())) {
+                                            Player player = Bukkit.getPlayer(args[2]);
+                                            ItemStack telepads = getPartItem(typesEnum);
+                                            player.getInventory().addItem(telepads.clone());
+                                            return true;
+                                        }
                                     }
                                 }
+                                Player player = Bukkit.getPlayer(args[1]);
+                                ItemStack telepads = getTelePadItem(System.currentTimeMillis() + "", false, false, null, configManager.getCategoryDefault());
+                                player.getInventory().addItem(telepads.clone());
+                                return true;
                             }
-                            Player player = Bukkit.getPlayer(args[1]);
-                            ItemStack telepads = getTelePadItem(System.currentTimeMillis() + "", false, false, null, configManager.getCategoryDefault());
-                            player.getInventory().addItem(telepads.clone());
-                            return true;
                         }
                     }
                 }
+                if (sender instanceof Player)
+                {
+                    Player player = (Player) sender;
+                    for(int i = 0; i < 100; i++)
+                    {
+                        if (LangManager.instants.contains("help." + i))
+                            player.sendMessage(LangManager.instants.getMessage("help." + i));
+                    }
+                }
+                else
+                {
+                    for(int i = 0; i < 100; i++)
+                    {
+                        if (LangManager.instants.contains("help.c" + i))
+                            messageTool.sendMessageSystem(LangManager.instants.getMessage("help.c" + i));
+                    }
+                }
             }
+        } catch (Exception e) {
             if (sender instanceof Player)
             {
-                Player player = (Player) sender;
-                messageTool.sendMessagePlayer(player, ChatColor.GOLD + "----- Admin Commands -----");
-                messageTool.sendMessagePlayer(player, ChatColor.GOLD + "/tep " + ChatColor.WHITE + "reload " + ChatColor.AQUA + "- Reloads config files");
-                messageTool.sendMessagePlayer(player, ChatColor.GOLD + "/tep " + ChatColor.WHITE + "give " + ChatColor.GRAY + "<name> " + ChatColor.AQUA + "- Give player (player) a telepad");
-                messageTool.sendMessagePlayer(player, ChatColor.GOLD + "/tep " + ChatColor.WHITE + "give " + ChatColor.GRAY + "<telepad, wires, wiring_box, teleporter_box> <player> " + ChatColor.AQUA + "- Give player a telepad ,wires, wiring_box, or teleporter_box");
-                messageTool.sendMessagePlayer(player, ChatColor.GOLD + "/tep " + ChatColor.WHITE + "remove " + ChatColor.GRAY + "<all/distance from player> " + ChatColor.RED + "- removes all holograms.");
-                messageTool.sendMessagePlayer(player, ChatColor.GOLD + "/tep " + ChatColor.WHITE + "remove " + ChatColor.GRAY + "<distance from player> false " + ChatColor.RED + "- removes all armor stands.");
-                messageTool.sendMessagePlayer(player, ChatColor.GOLD + "----- Admin Commands -----");
+                messageTool.sendMessagePlayer((Player) sender,LangManager.instants.getMessage("error.understand"));
             }
             else
             {
-                messageTool.sendMessageSystem("/tep reload - Reloads config files");
-                messageTool.sendMessageSystem("/tep give <player> - Give player (name) a telepad");
-                messageTool.sendMessageSystem("/tep give <telepads, wires, wiring_box, teleporter_box> <player> - Give player (name) a telepads ,wires, wiring_box, or teleporter_box");
+                messageTool.sendMessageSystem(LangManager.instants.getMessage("error.understand"));
             }
         }
 
@@ -237,17 +314,17 @@ public class TitanTelePads extends JavaPlugin {
         }
         telepads = tools.getItemStackTool().setTitanItemID(telepads, TitanItemTypesEnum.TELEPAD.getID());
         telepads = tools.getItemStackTool().setPlaceable(telepads, TitanItemTypesEnum.TELEPAD.isPlaceable());
-        telepads = tools.getItemStackTool().changeName(telepads, ChatColor.AQUA + TitanItemTypesEnum.TELEPAD.getName());
-        if (admin) telepads = tools.getItemStackTool().changeName(telepads, ChatColor.RED + "ADMIN " + ChatColor.AQUA + "Teleport Pad");
+        telepads = tools.getItemStackTool().changeName(telepads, LangManager.instants.getMessage("items.telepad.name"));
+        if (admin) telepads = tools.getItemStackTool().changeName(telepads, LangManager.instants.getMessage("items.telepad.admin") +  LangManager.instants.getMessage("items.telepad.name"));
 
         List<String> lores = new ArrayList<String>();
-        String privacylore = "Public";
-        if (privacy) privacylore = "Private";
+        String privacylore = LangManager.instants.getMessage("items.telepad.public");
+        if (privacy) privacylore = LangManager.instants.getMessage("items.telepad.private");
 
-        lores.add("Name: " + ChatColor.WHITE + name);
-        if (!tools.getItemStackTool().isEmpty(icon)) lores.add(ChatColor.GREEN + "Icon saved!");
+        lores.add(LangManager.instants.getMessage("items.telepad.name2") + ChatColor.WHITE + name);
+        if (!tools.getItemStackTool().isEmpty(icon)) lores.add(LangManager.instants.getMessage("items.telepad.icon"));
         lores.add(privacylore);
-        if (category != null && category.length() > 1) lores.add("Category: " +  ChatColor.WHITE + category);
+        if (category != null && category.length() > 1) lores.add(LangManager.instants.getMessage("items.telepad.category") +  ChatColor.WHITE + category);
 
         telepads = tools.getItemStackTool().addLore(true, telepads, lores);
 

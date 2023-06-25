@@ -1,0 +1,66 @@
+help:
+  1: "&6----- Admin Commands -----"
+  2: "&6/tep &freload &b- Reloads config files"
+  3: "&6/tep &fgive &7<name> &b- Give player (player) a telepad"
+  4: "&6/tep &fgive &7<telepad, wires, wiring_box, teleporter_box> <player> &b- Give player a telepad ,wires, wiring_box, or teleporter_box"
+  5: "&c----- Use with caution -----"
+  6: "&6/tep &fremove &7<holograms/armorstands> <all/distance> &c- removes all holograms/armor stands."
+  7: "&c----- Use with caution -----"
+  8: "&6----- Admin Commands -----"
+  c1: "/tep reload - Reloads config files"
+  c2: "/tep give <player> - Give player (name) a telepad"
+  c3: "/tep give <telepads, wires, wiring_box, teleporter_box> <player> - Give player (name) a telepads ,wires, wiring_box, or teleporter_box"
+error:
+  understand: "I don't understand the command."
+  default_file: "Failed to get the default file: "
+  console: "Only players can use this command."
+  unsafe: "You can't use all on unsafe removal."
+  number: " isn't a number"
+items:
+  telepad:
+    name: "&bTeleport Pad"
+    name2: "&dName: "
+    admin: "&cADMIN "
+    public: "&dPublic"
+    private: "&dPrivate"
+    icon: "&aIcon Saved!"
+    category: "&dCategory: "
+  wires:
+    name: "Wires"
+    lore: ""
+  wiring_box:
+    name: "Wiring Box"
+    lore: ""
+  teleporter_box:
+    name: "Teleporter Box"
+    lore: ""
+reloaded: "config reloaded!"
+holograms_removed: " holograms removed."
+armor_stands_removed: " armor stands removed."
+icon:
+  changed: "Icon changed!"
+  canceled: "Icon changed CANCELED!"
+  clicked: "&aType Hand in chat for item in your main hand, or paste texture code for head, or cancel to cancel"
+name:
+  changed: "Name changed!"
+  canceld: "Name changed CANCELED!"
+  clicked: "&aType Name in chat, or cancel to cancel"
+status: "&aStatus changed to : "
+telepadgui:
+  scroll_up: "Scroll Up"
+  scroll_down: "Scroll Down"
+  public: "&a(Public) "
+  private: "&c(Private) "
+  owner: "&dOwner: "
+  admin: "&fADMIN"
+  world: "&dWorld: "
+  right: "&7Right Click for settings."
+  name: "TelePad Gui"
+telepadguisettings:
+  name: "TelePad Settings Gui"
+  name2: "&dName: "
+  private: "&dPrivate: "
+  category: "&dCategory: "
+  icon: "&dIcon"
+  back: "&dBack"
+

@@ -4,6 +4,7 @@ import com.firesoftitan.play.titanbox.telepads.TitanTelePads;
 import com.firesoftitan.play.titanbox.telepads.enums.TitanItemTypesEnum;
 import com.firesoftitan.play.titanbox.telepads.guis.TelepadGui;
 import com.firesoftitan.play.titanbox.telepads.guis.TelepadSettingsGui;
+import com.firesoftitan.play.titanbox.telepads.managers.LangManager;
 import com.firesoftitan.play.titanbox.telepads.managers.PressureManager;
 import com.firesoftitan.play.titanbox.telepads.managers.TelePadsManager;
 import net.minecraft.nbt.NBTTagCompound;
@@ -143,7 +144,7 @@ public class MainListener  implements Listener {
                                     case "private":
                                         if (isAdmin(whoClicked) || isOwner) {
                                             TelePadsManager.instants.setPrivate(locations, !TelePadsManager.instants.isPrivate(locations));
-                                            messageTool.sendMessagePlayer((Player) whoClicked, ChatColor.GREEN + "Status changed to : " + TelePadsManager.instants.isPrivate(locations));
+                                            messageTool.sendMessagePlayer((Player) whoClicked, LangManager.instants.getMessage("status") + TelePadsManager.instants.isPrivate(locations));
                                             telepadGui.reDrawSettings();
                                         }
                                         break;
@@ -160,14 +161,14 @@ public class MainListener  implements Listener {
                                         if (isAdmin(whoClicked) || isOwner) {
                                             instants.togglePlayerChat((Player) whoClicked, false);
                                             chatMessageManager.addToIcon(whoClicked.getUniqueId(), locations);
-                                            messageTool.sendMessagePlayer((Player) whoClicked, ChatColor.GREEN + "Type Hand in chat for item in your main hand, or paste texture code for head, or cancel to cancel");
+                                            messageTool.sendMessagePlayer((Player) whoClicked, LangManager.instants.getMessage("icon.clicked"));
                                             whoClicked.closeInventory();
                                         }
                                         break;
                                     case "owner":
                                         if (isAdmin(whoClicked)) {
                                             TelePadsManager.instants.setAdmin(locations, !TelePadsManager.instants.isAdmin(locations));
-                                            messageTool.sendMessagePlayer((Player) whoClicked, ChatColor.GREEN + "Status changed to : " + TelePadsManager.instants.isAdmin(locations));
+                                            messageTool.sendMessagePlayer((Player) whoClicked, LangManager.instants.getMessage("status") +  TelePadsManager.instants.isAdmin(locations));
                                             telepadGui.reDrawSettings();
                                         }
                                         break;
@@ -175,7 +176,7 @@ public class MainListener  implements Listener {
                                         if (isAdmin(whoClicked) || isOwner) {
                                             instants.togglePlayerChat((Player) whoClicked, false);
                                             chatMessageManager.addToNames(whoClicked.getUniqueId(), locations);
-                                            messageTool.sendMessagePlayer((Player) whoClicked, ChatColor.GREEN + "Type Name in chat, or cancel to cancel");
+                                            messageTool.sendMessagePlayer((Player) whoClicked, LangManager.instants.getMessage("name.clicked"));
                                             whoClicked.closeInventory();
                                         }
                                         break;
