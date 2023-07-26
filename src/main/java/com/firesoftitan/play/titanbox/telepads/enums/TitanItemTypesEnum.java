@@ -3,9 +3,6 @@ package com.firesoftitan.play.titanbox.telepads.enums;
 import com.firesoftitan.play.titanbox.telepads.managers.LangManager;
 import org.bukkit.Material;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public enum TitanItemTypesEnum {
     TELEPAD(Material.STRING, 70001, "TELEPAD", LangManager.instants.getMessage("items.telepad.name"), true, ""),
     WIRES(Material.STRING, 70002, "WIRES", LangManager.instants.getMessage("items.wires.name"), false, LangManager.instants.getMessage("items.wires.lore")),

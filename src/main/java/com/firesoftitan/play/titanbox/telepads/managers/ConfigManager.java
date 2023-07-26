@@ -60,7 +60,7 @@ public class ConfigManager {
         {
             configFile.set("settings.resourcepack.enabled", true);
         }
-        if (!configFile.contains("settings.resourcepack.enabled"))
+        if (!configFile.contains("settings.language"))
         {
             configFile.set("settings.language", "en_us");
         }
@@ -106,9 +106,11 @@ public class ConfigManager {
 
         this.gui_enabled = configFile.getBoolean("settings.resourcepack.gui_enabled");
         this.language = configFile.getString("settings.language");
+        if (this.language == null) this.language = "en_us";
         configFile.save();
 
     }
+
 
     public String getLanguage() {
         return language;

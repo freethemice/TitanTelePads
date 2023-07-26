@@ -7,12 +7,9 @@ import com.firesoftitan.play.titanbox.telepads.guis.TelepadSettingsGui;
 import com.firesoftitan.play.titanbox.telepads.managers.LangManager;
 import com.firesoftitan.play.titanbox.telepads.managers.PressureManager;
 import com.firesoftitan.play.titanbox.telepads.managers.TelePadsManager;
-import net.minecraft.nbt.NBTTagCompound;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -21,16 +18,16 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.event.inventory.*;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -289,12 +286,12 @@ public class MainListener  implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void  onBlockBreakEvent(BlockBreakEvent event)
     {
-        Player player = event.getPlayer();
+/*        Player player = event.getPlayer();
         Block block = event.getBlock();
-        Location location = block.getLocation();
+        Location location = block.getLocation().clone();
         if (checkPlusBreak(location)) event.setDropItems(false);
         location = block.getLocation().add(0,1,0);
-        if (checkPlusBreak(location)) event.setDropItems(false);
+        if (checkPlusBreak(location)) event.setDropItems(false);*/
 
     }
 

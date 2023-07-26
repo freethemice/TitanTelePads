@@ -10,13 +10,13 @@ settings:
     Mine: #Mineis special and will show all telepads for that user, no permission and no default allowed
       slot: 2
       default_open: true #this category will show first when standing on a pad
-    Events: #can be change to any name
+    Events: #can be changed to any name
       permission: titanbox.admin #what permission you need to SET telepads to this category
       slot: 3
-    Spawns: #can be change to any name
+    Spawns: #can be changed to any name
       permission: titanbox.admin
       slot: 4
-    Public: #can be change to any name
+    Public: #can be changed to any name
       permission: none #none means anyone can set telepad to this category
       slot: 5
       default: true #This is the category that telepads are set to when placing

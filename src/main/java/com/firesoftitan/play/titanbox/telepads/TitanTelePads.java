@@ -11,7 +11,6 @@ import com.firesoftitan.play.titanbox.telepads.managers.*;
 import com.firesoftitan.play.titanbox.telepads.runnables.SaveRunnable;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import net.minecraft.nbt.NBTTagCompound;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -78,7 +77,6 @@ public class TitanTelePads extends JavaPlugin {
         List<String> jarFileList = getJarFiles();
         for(String s: jarFileList)
         {
-            System.out.println(s);
             saveDefaultFile(s);
         }
     }

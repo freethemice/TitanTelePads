@@ -4,8 +4,6 @@ import com.firesoftitan.play.titanbox.libs.managers.SaveManager;
 import com.firesoftitan.play.titanbox.telepads.TitanTelePads;
 import org.bukkit.ChatColor;
 
-import java.io.File;
-
 public class LangManager {
     private SaveManager configFile;
     private String lang_file;
@@ -22,7 +20,7 @@ public class LangManager {
     }
 
     public String getMessage(String key) {
-        if (!contains(key)) return ChatColor.RED + "KEY NOT FOUND";
+        if (!contains(key)) return ChatColor.RED + "KEY NOT FOUND" + key;
         String string = this.configFile.getString(key);
         string = ChatColor.translateAlternateColorCodes('&',string);
         return string;

@@ -27,9 +27,8 @@ public class TabCompleteListener implements TabCompleter {
             if (TitanTelePads.isAdmin(commandSender)) {
                 Commands.addAll(List.of(ADMIN_COMMANDS));
             }
-            else {
-                Commands.addAll(List.of(NON_ADMIN_COMMANDS));
-            }
+            Commands.addAll(List.of(NON_ADMIN_COMMANDS));
+
         }
         if (args.length == 2) {
             if (args[0].equalsIgnoreCase("give"))

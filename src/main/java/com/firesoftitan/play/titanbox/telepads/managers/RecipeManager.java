@@ -4,6 +4,7 @@ import com.firesoftitan.play.titanbox.telepads.TitanTelePads;
 import com.firesoftitan.play.titanbox.telepads.enums.TitanItemTypesEnum;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+
 import static com.firesoftitan.play.titanbox.telepads.TitanTelePads.tools;
 
 public class RecipeManager {
