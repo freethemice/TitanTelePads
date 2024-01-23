@@ -21,6 +21,6 @@ settings:
       slot: 5
       default: true #This is the category that telepads are set to when placing
   resourcepack:
-    url: http://play.firesoftitan.com/global/030122/TitanBox.zip
+    url: http://play.firesoftitan.com/global/012324/TitanPack.zip
     enabled: true #If enabled the plugin will force players to this resoure pack
     gui_enabled: true #true will use the texture pack, false will use blocks (false, is not recommended)
