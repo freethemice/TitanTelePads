@@ -252,13 +252,13 @@ public class MainListener  implements Listener {
         new BukkitRunnable() {
             @Override
             public void run() {
-                location.getBlock().setType(configManager.getMaterial());
-                TelePadsManager.instants.getHologramName(location);
-                TelePadsManager.instants.getHologramBlock(location);
+                TelePadsManager.instants.FixTelepad(location);
                 pressureManager.setTeleporting(false);
             }
         }.runTaskLater(instants, (teleportDelay + 1)* 20L);
     }
+
+
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void  onPlayerMoveEvent(PlayerMoveEvent event)
@@ -271,11 +271,9 @@ public class MainListener  implements Listener {
         }
 
         if (TelePadsManager.instants.isTelePad(location) || TelePadsManager.instants.isTelePad(location.clone().add(0, -1, 0))) {
+            if (TelePadsManager.instants.isTelePad(location)) TelePadsManager.instants.FixTelepad(new Location(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ()));
+            if (TelePadsManager.instants.isTelePad(location.clone().add(0, -1, 0))) TelePadsManager.instants.FixTelepad(new Location(location.getWorld(), location.getBlockX(), location.getBlockY() - 1, location.getBlockZ()));
             if (!PressureManager.contains(player)) {
-
-                //TelePadsManager.instants.getHologramName(location);
-                //TelePadsManager.instants.getHologramBlock(location);
-
                 new PressureManager(location,System.currentTimeMillis(), player);
                 TelepadGui telepadGui = new TelepadGui();
                 telepadGui.showGUI(player);

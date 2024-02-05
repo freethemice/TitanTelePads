@@ -19,13 +19,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static com.firesoftitan.play.titanbox.telepads.TitanTelePads.configManager;
 import static com.firesoftitan.play.titanbox.telepads.TitanTelePads.tools;
 
 
 public class TelePadsManager {
-    private SaveManager configFile;
+    private final SaveManager configFile;
     public static TelePadsManager instants;
-    private List<Location> output;
+    private final List<Location> output;
     public TelePadsManager() {
         configFile  = new SaveManager(TitanTelePads.instants.getName(), "telepads");
         instants = this;
@@ -34,7 +35,14 @@ public class TelePadsManager {
         {
             Location location = TitanTelePads.tools.getSerializeTool().deserializeLocation(key);
             output.add(location.clone());
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    TelePadsManager.instants.FixTelepad(location);
+                }
+            }.runTaskLater(TitanTelePads.instants, 20);
         }
+
     }
     public void save()
     {
@@ -43,8 +51,7 @@ public class TelePadsManager {
     public boolean isTelePad(Location location)
     {
         String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
-        if (configFile.contains("telepads." + key))  return true;
-        return false;
+        return configFile.contains("telepads." + key);
     }
     public String getOwnerName(Location location)
     {
@@ -52,7 +59,7 @@ public class TelePadsManager {
         UUID owner = getOwner(location);
         OfflinePlayer player = Bukkit.getOfflinePlayer(owner);
         String name = player.getName();
-        if (name == null || name.length() < 1) return "Admin";
+        if (name == null || name.isEmpty()) return "Admin";
         return name;
     }
     public HologramManager getHologramBlock(Location location)
@@ -63,7 +70,7 @@ public class TelePadsManager {
         if (hologramManager == null)
         {
             List<HologramManager> holograms = tools.getHologramTool().getHolograms(location);
-            if (holograms.size() > 0) hologramManager = holograms.get(0);
+            if (!holograms.isEmpty()) hologramManager = holograms.get(0);
             if (hologramManager == null || hologramManager.getText() != null) hologramManager = setUpHologramBlock(location);
         }
         return hologramManager;
@@ -81,6 +88,11 @@ public class TelePadsManager {
         configFile.set("telepads." + key + ".hologram.block", hologramManager.getUUID());
         return hologramManager;
     }
+    public void FixTelepad(Location location) {
+        location.getBlock().setType(configManager.getMaterial());
+        this.getHologramName(location);
+        this.getHologramBlock(location);
+    }
     public HologramManager getHologramName(Location location)
     {
         String key = TitanTelePads.tools.getSerializeTool().serializeLocation(location);
@@ -89,7 +101,7 @@ public class TelePadsManager {
         if (hologramManager == null)
         {
             List<HologramManager> holograms = tools.getHologramTool().getHolograms(location.clone().add(0 ,2,0));
-            if (holograms.size() > 0) hologramManager = holograms.get(0);
+            if (!holograms.isEmpty()) hologramManager = holograms.get(0);
             if (hologramManager == null || hologramManager.getText() == null) hologramManager = setUpHologramName(location);
         }
         return hologramManager;
@@ -147,14 +159,16 @@ public class TelePadsManager {
                     else
                         playersTexture = TitanTelePads.tools.getPlayerTool().getPlayersTexture(UUID.fromString("069a79f4-44e9-4726-a5be-fca90e38aaf5"));
 
-                    ItemStack skull = TitanTelePads.tools.getSkullTool().getSkull(playersTexture);
+                    ItemStack skull = new ItemStack(Material.LILAC);
+                    if (playersTexture != null) skull = TitanTelePads.tools.getSkullTool().getSkull(playersTexture);
                     configFile.set("telepads." + key + ".icon", skull);
+
                 }
                 else
                 {
                     configFile.set("telepads." + key + ".icon", new ItemStack(Material.BOOKSHELF));
                 }
-            } catch (IOException e) {
+            } catch (Exception ignore) {
 
             }
         }
@@ -257,20 +271,21 @@ public class TelePadsManager {
         setUpHologramBlock(location);
         try {
             if (!admin) {
-                String playersTexture;
+                String playerTexture;
                 if (TitanTelePads.tools.getPlayerTool().doesPlayersHaveTexture(getOwner(location)))
-                    playersTexture = TitanTelePads.tools.getPlayerTool().getPlayersTexture(getOwner(location));
+                    playerTexture = TitanTelePads.tools.getPlayerTool().getPlayersTexture(getOwner(location));
                 else
-                    playersTexture = TitanTelePads.tools.getPlayerTool().getPlayersTexture(UUID.fromString("069a79f4-44e9-4726-a5be-fca90e38aaf5"));
+                    playerTexture = TitanTelePads.tools.getPlayerTool().getPlayersTexture(UUID.fromString("069a79f4-44e9-4726-a5be-fca90e38aaf5"));
 
-                ItemStack skull = TitanTelePads.tools.getSkullTool().getSkull(playersTexture);
+                ItemStack skull = new ItemStack(Material.LILAC);
+                if (playerTexture != null) skull = TitanTelePads.tools.getSkullTool().getSkull(playerTexture);
                 configFile.set("telepads." + key + ".icon", skull);
             }
             else
             {
                 configFile.set("telepads." + key + ".icon", new ItemStack(Material.BOOKSHELF));
             }
-        } catch (IOException e) {
+        } catch (Exception ignored) {
 
         }
         output.add(location.clone());
@@ -314,7 +329,6 @@ public class TelePadsManager {
     }
     public List<Location> getAll()
     {
-        List<Location> all = new ArrayList<Location>(output);
-        return all;
+        return new ArrayList<Location>(output);
     }
 }
